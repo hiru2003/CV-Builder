@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928984143067",
+    "project_id": "cv-builder-9435f",
+    "storage_bucket": "cv-builder-9435f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928984143067:android:3f3a029a96ebea473b68fe",
+        "android_client_info": {
+          "package_name": "com.mcproject.cvbuilder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiuH4Om2H3rgC-qbnSM74Osl59gSZkGpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

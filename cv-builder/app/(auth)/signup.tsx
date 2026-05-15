@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link, useRouter } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebaseConfig';
 
@@ -36,13 +36,21 @@ export default function SignupScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 3. Store additional user details in Firestore
+      // 3. Set the display name directly on the Firebase User object
+      await updateProfile(user, { displayName: fullName });
+
+      // 4. Store additional user details in Firestore
       // We use the user's unique ID (uid) as the document ID in the "users" collection
-      await setDoc(doc(db, 'users', user.uid), {
-        fullName: fullName,
-        email: email.toLowerCase(), // Store emails in lowercase
-        createdAt: new Date(),
-      });
+      try {
+        await setDoc(doc(db, 'users', user.uid), {
+          fullName: fullName,
+          email: email.toLowerCase(), // Store emails in lowercase
+          createdAt: new Date(),
+        });
+      } catch (firestoreError) {
+        // We log the error, but don't stop the signup process if Firestore permissions aren't set yet
+        console.warn("Firestore save failed (likely permissions), but user was created:", firestoreError);
+      }
 
       // 4. Navigate to Home screen upon success
       router.replace('/(tabs)');

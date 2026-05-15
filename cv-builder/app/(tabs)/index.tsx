@@ -1,98 +1,108 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../config/firebaseConfig';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1:Hirusha </ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const [userName, setUserName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          // Force reload the user to get the absolute latest profile data from Firebase servers
+          await user.reload();
+          // The user object reference might change after reload, so fetch the latest one
+          const updatedUser = auth.currentUser;
+
+          // 1. Immediately use the display name if we set it during signup
+          if (updatedUser && updatedUser.displayName) {
+            setUserName(updatedUser.displayName);
+          } else {
+            // Fallback to email prefix immediately so the UI doesn't look broken
+            setUserName(updatedUser?.email?.split('@')[0] || 'User');
+          }
+
+          // 2. (Optional) Try to fetch from Firestore just in case they updated their name there
+          try {
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+              const userData = userDocSnap.data();
+              if (userData.fullName) {
+                setUserName(userData.fullName);
+              }
+            }
+          } catch (firestoreError) {
+            // If Firestore rules block the read, we just ignore it since we already have the name
+            console.log("Firestore read skipped/failed, using Auth display name instead.");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Our routing listener in _layout.tsx will automatically detect this
+      // and redirect the user back to the login screen!
+    } catch (error) {
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    }
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50 px-6">
+      {/* Header Section */}
+      <View className="flex-row justify-between items-center mb-8 mt-4">
+        <View>
+          <Text className="text-gray-500 text-base mb-1">Welcome back,</Text>
+          <View className="flex-row items-center">
+            {loading ? (
+              <ActivityIndicator size="small" color="#2563eb" className="mr-2" />
+            ) : null}
+            <Text className="text-3xl font-bold text-gray-900">
+              {loading ? 'Loading...' : `${userName} 👋`}
+            </Text>
+          </View>
+        </View>
+        
+        {/* Logout Button */}
+        <TouchableOpacity 
+          onPress={handleLogout}
+          className="bg-red-100 px-4 py-2 rounded-full"
+        >
+          <Text className="text-red-600 font-semibold">Log out</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Main Content Area */}
+      <View className="flex-1 justify-center items-center">
+        <View className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 w-full items-center">
+          <View className="w-16 h-16 bg-blue-100 rounded-full items-center justify-center mb-4">
+            <Text className="text-2xl">📄</Text>
+          </View>
+          <Text className="text-2xl font-bold text-gray-800 mb-3 text-center">
+            CV Builder Dashboard
+          </Text>
+          <Text className="text-gray-500 text-center leading-6 text-base">
+            Your CV creation journey starts here. 
+            We'll add features to build your resume soon!
+          </Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

@@ -11,42 +11,25 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // 1. INSTANT LOAD: Immediately show whatever name we have and turn off the loading text!
+      setUserName(user.displayName || user.email?.split('@')[0] || 'User');
+      setLoading(false);
+
+      // 2. BACKGROUND UPDATE: Silently fetch the latest profile data from the server
       try {
-        const user = auth.currentUser;
-        if (user) {
-          // Force reload the user to get the absolute latest profile data from Firebase servers
-          await user.reload();
-          // The user object reference might change after reload, so fetch the latest one
-          const updatedUser = auth.currentUser;
-
-          // 1. Immediately use the display name if we set it during signup
-          if (updatedUser && updatedUser.displayName) {
-            setUserName(updatedUser.displayName);
-          } else {
-            // Fallback to email prefix immediately so the UI doesn't look broken
-            setUserName(updatedUser?.email?.split('@')[0] || 'User');
-          }
-
-          // 2. (Optional) Try to fetch from Firestore just in case they updated their name there
-          try {
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDocSnap = await getDoc(userDocRef);
-
-            if (userDocSnap.exists()) {
-              const userData = userDocSnap.data();
-              if (userData.fullName) {
-                setUserName(userData.fullName);
-              }
-            }
-          } catch (firestoreError) {
-            // If Firestore rules block the read, we just ignore it since we already have the name
-            console.log("Firestore read skipped/failed, using Auth display name instead.");
-          }
+        await user.reload();
+        const updatedUser = auth.currentUser;
+        if (updatedUser && updatedUser.displayName) {
+          setUserName(updatedUser.displayName);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
+        console.log("Background profile reload skipped", error);
       }
     };
 

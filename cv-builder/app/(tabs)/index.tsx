@@ -4,9 +4,11 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const [userName, setUserName] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -75,7 +77,10 @@ export default function HomeScreen() {
               <Text className="text-blue-100 text-base mb-6 leading-6">
                 Create a professional ATS-friendly CV in minutes and land your next job.
               </Text>
-              <TouchableOpacity className="bg-white px-6 py-3 rounded-full self-start shadow-sm flex-row items-center">
+              <TouchableOpacity 
+                onPress={() => router.push('/cv/create')}
+                className="bg-white px-6 py-3 rounded-full self-start shadow-sm flex-row items-center"
+              >
                 <Ionicons name="add" size={20} color="#2563eb" />
                 <Text className="text-blue-600 font-bold ml-1">Create New CV</Text>
               </TouchableOpacity>

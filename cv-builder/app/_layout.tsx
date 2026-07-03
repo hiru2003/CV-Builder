@@ -60,6 +60,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="cv/select-template" options={{ headerShown: false }} />
         <Stack.Screen name="cv/create" options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -15,6 +15,7 @@ type TabType = typeof TABS[number];
 
 export default function CreateCVScreen() {
   const router = useRouter();
+  const { template = 'classic' } = useLocalSearchParams<{ template?: string }>();
   
   // --- Mode & Navigation State ---
   const [activeMode, setActiveMode] = useState<'edit' | 'preview'>('edit');
@@ -66,8 +67,9 @@ export default function CreateCVScreen() {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
-  // --- HTML Template Generation for PDF ---
+  // --- HTML Template Generation for PDF (Supports 3 Layout Styles) ---
   const generateHTML = () => {
+    // Shared HTML sub-elements
     const experiencesHTML = experiences.map(exp => `
       <div class="item">
         <div class="item-header">
@@ -89,10 +91,354 @@ export default function CreateCVScreen() {
       </div>
     `).join('');
 
-    const skillsHTML = skills.map(skill => `
-      <span class="skill-tag">${skill}</span>
-    `).join('');
+    const skillsHTML = skills.map(skill => {
+      if (template === 'creative') {
+        return `<span class="skill-tag skill-tag-dark">${skill}</span>`;
+      }
+      return `<span class="skill-tag">${skill}</span>`;
+    }).join('');
 
+    // --- Option 1: Modern Minimalist Layout ---
+    if (template === 'modern') {
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: Georgia, serif;
+              color: #1f2937;
+              margin: 40px;
+              line-height: 1.6;
+              font-size: 13.5px;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 30px;
+            }
+            .name {
+              font-size: 30px;
+              font-weight: normal;
+              margin-bottom: 6px;
+              color: #111827;
+              letter-spacing: 0.5px;
+            }
+            .title {
+              font-size: 14px;
+              font-weight: normal;
+              color: #6b7280;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              letter-spacing: 2px;
+            }
+            .contact {
+              font-size: 11px;
+              color: #4b5563;
+              display: flex;
+              justify-content: center;
+              flex-wrap: wrap;
+              gap: 14px;
+              border-top: 1px solid #e5e7eb;
+              border-bottom: 1px solid #e5e7eb;
+              padding: 6px 0;
+            }
+            .section {
+              margin-bottom: 24px;
+            }
+            .section-title {
+              font-size: 12px;
+              font-weight: bold;
+              color: #111827;
+              padding-bottom: 3px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              letter-spacing: 2px;
+              text-align: center;
+            }
+            .section-title::after {
+              content: '';
+              display: block;
+              width: 30px;
+              height: 1px;
+              background-color: #374151;
+              margin: 4px auto 0 auto;
+            }
+            .summary-text {
+              font-size: 12px;
+              color: #4b5563;
+              text-align: center;
+            }
+            .item {
+              margin-bottom: 14px;
+            }
+            .item-header {
+              display: flex;
+              justify-content: space-between;
+              font-size: 13px;
+              font-weight: bold;
+              color: #111827;
+            }
+            .item-title {
+              font-weight: bold;
+            }
+            .item-date {
+              font-size: 11.5px;
+              color: #6b7280;
+              font-weight: normal;
+            }
+            .item-sub {
+              font-size: 12px;
+              font-style: italic;
+              color: #4b5563;
+              margin-bottom: 4px;
+            }
+            .item-desc {
+              font-size: 11.5px;
+              color: #4b5563;
+              text-align: justify;
+            }
+            .skills-container {
+              text-align: center;
+            }
+            .skill-tag {
+              border: 1px solid #e5e7eb;
+              padding: 3px 8px;
+              border-radius: 4px;
+              font-size: 11px;
+              display: inline-block;
+              margin: 3px;
+              color: #374151;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="name">${personalInfo.fullName || 'Your Name'}</div>
+            <div class="title">${personalInfo.jobTitle || 'Professional Title'}</div>
+            <div class="contact">
+              ${personalInfo.email ? `<span>${personalInfo.email}</span>` : ''}
+              ${personalInfo.phone ? `<span>${personalInfo.phone}</span>` : ''}
+              ${personalInfo.address ? `<span>${personalInfo.address}</span>` : ''}
+              ${personalInfo.linkedin ? `<span>${personalInfo.linkedin}</span>` : ''}
+            </div>
+          </div>
+          
+          ${summary ? `
+          <div class="section">
+            <div class="section-title">Professional Summary</div>
+            <div class="summary-text">${summary}</div>
+          </div>
+          ` : ''}
+          
+          ${experiences.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Work Experience</div>
+            ${experiencesHTML}
+          </div>
+          ` : ''}
+          
+          ${educations.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Education</div>
+            ${educationsHTML}
+          </div>
+          ` : ''}
+          
+          ${skills.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-container">
+              ${skillsHTML}
+            </div>
+          </div>
+          ` : ''}
+        </body>
+        </html>
+      `;
+    }
+
+    // --- Option 2: Creative Sidebar Layout ---
+    if (template === 'creative') {
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body {
+              font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+              color: #1f2937;
+              margin: 0;
+              padding: 0;
+              font-size: 12px;
+            }
+            .wrapper {
+              display: table;
+              width: 100%;
+              min-height: 100vh;
+            }
+            .sidebar {
+              display: table-cell;
+              width: 32%;
+              background-color: #f3f4f6;
+              padding: 30px 20px;
+              vertical-align: top;
+              border-right: 1px solid #e5e7eb;
+            }
+            .main-content {
+              display: table-cell;
+              width: 68%;
+              padding: 30px 25px;
+              vertical-align: top;
+            }
+            .name {
+              font-size: 24px;
+              font-weight: 800;
+              color: #111827;
+              line-height: 1.2;
+              margin-bottom: 6px;
+            }
+            .title {
+              font-size: 13px;
+              font-weight: 700;
+              color: #d97706;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              margin-bottom: 25px;
+            }
+            .sidebar-title {
+              font-size: 11px;
+              font-weight: bold;
+              text-transform: uppercase;
+              color: #111827;
+              letter-spacing: 1px;
+              border-bottom: 2px solid #d97706;
+              padding-bottom: 4px;
+              margin-bottom: 12px;
+              margin-top: 25px;
+            }
+            .sidebar-title:first-of-type {
+              margin-top: 0;
+            }
+            .contact-item {
+              margin-bottom: 10px;
+              font-size: 11px;
+              color: #4b5563;
+              word-break: break-all;
+            }
+            .contact-label {
+              font-weight: bold;
+              color: #111827;
+              display: block;
+              margin-bottom: 2px;
+            }
+            .section {
+              margin-bottom: 22px;
+            }
+            .section-title {
+              font-size: 13px;
+              font-weight: bold;
+              color: #111827;
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 4px;
+              margin-bottom: 14px;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .summary-text {
+              font-size: 11.5px;
+              color: #4b5563;
+              text-align: justify;
+              line-height: 1.5;
+            }
+            .item {
+              margin-bottom: 14px;
+            }
+            .item-header {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12.5px;
+              font-weight: bold;
+              color: #111827;
+            }
+            .item-date {
+              font-size: 10.5px;
+              color: #6b7280;
+              font-weight: normal;
+            }
+            .item-sub {
+              font-size: 11.5px;
+              font-style: italic;
+              color: #d97706;
+              margin-bottom: 4px;
+            }
+            .item-desc {
+              font-size: 11px;
+              color: #4b5563;
+              text-align: justify;
+            }
+            .skill-tag-dark {
+              background-color: #111827;
+              color: #ffffff;
+              padding: 4px 8px;
+              border-radius: 6px;
+              font-size: 10px;
+              font-weight: 500;
+              display: inline-block;
+              margin: 3px 2px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="sidebar">
+              <div class="name">${personalInfo.fullName || 'Your Name'}</div>
+              <div class="title">${personalInfo.jobTitle || 'Professional Title'}</div>
+              
+              <div class="sidebar-title">Contact</div>
+              ${personalInfo.email ? `<div class="contact-item"><span class="contact-label">Email</span>${personalInfo.email}</div>` : ''}
+              ${personalInfo.phone ? `<div class="contact-item"><span class="contact-label">Phone</span>${personalInfo.phone}</div>` : ''}
+              ${personalInfo.address ? `<div class="contact-item"><span class="contact-label">Address</span>${personalInfo.address}</div>` : ''}
+              ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-label">LinkedIn</span>${personalInfo.linkedin}</div>` : ''}
+              
+              ${skills.length > 0 ? `
+              <div class="sidebar-title">Skills</div>
+              <div style="margin-top: 8px;">
+                ${skillsHTML}
+              </div>
+              ` : ''}
+            </div>
+            
+            <div class="main-content">
+              ${summary ? `
+              <div class="section">
+                <div class="section-title">Profile Summary</div>
+                <div class="summary-text">${summary}</div>
+              </div>
+              ` : ''}
+              
+              ${experiences.length > 0 ? `
+              <div class="section">
+                <div class="section-title">Work Experience</div>
+                ${experiencesHTML}
+              </div>
+              ` : ''}
+              
+              ${educations.length > 0 ? `
+              <div class="section">
+                <div class="section-title">Education</div>
+                ${educationsHTML}
+              </div>
+              ` : ''}
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    // --- Option 3: Classic Corporate Layout (Default) ---
     return `
       <!DOCTYPE html>
       <html>
@@ -255,9 +601,297 @@ export default function CreateCVScreen() {
     }
   };
 
+  // --- Live Preview Component Renderer (Adapts UI to Selected Template) ---
+  const renderLivePreview = () => {
+    // --- Render Option 1: Modern Minimalist Layout ---
+    if (template === 'modern') {
+      return (
+        <View 
+          className="bg-white border border-gray-200 rounded-3xl p-6 min-h-[600px] mb-12"
+          style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 4,
+          }}
+        >
+          <View className="items-center mb-6">
+            <Text className="text-3xl font-light text-gray-900 text-center mb-1 tracking-wide" style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {personalInfo.fullName || 'YOUR NAME'}
+            </Text>
+            <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest text-center mb-4">
+              {personalInfo.jobTitle || 'PROFESSIONAL TITLE'}
+            </Text>
+            
+            <View className="w-full border-t border-b border-gray-150 py-2 flex-row flex-wrap justify-center gap-x-3 gap-y-1">
+              {personalInfo.email && <Text className="text-[10px] text-gray-600">{personalInfo.email}</Text>}
+              {personalInfo.phone && <Text className="text-[10px] text-gray-600">• {personalInfo.phone}</Text>}
+              {personalInfo.address && <Text className="text-[10px] text-gray-600">• {personalInfo.address}</Text>}
+              {personalInfo.linkedin && <Text className="text-[10px] text-gray-600">• {personalInfo.linkedin}</Text>}
+            </View>
+          </View>
+
+          {summary ? (
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center mb-2">Professional Summary</Text>
+              <View className="w-6 h-[1px] bg-gray-400 mx-auto mb-3" />
+              <Text className="text-xs text-gray-600 leading-relaxed text-center">{summary}</Text>
+            </View>
+          ) : null}
+
+          {experiences.length > 0 ? (
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center mb-2">Work Experience</Text>
+              <View className="w-6 h-[1px] bg-gray-400 mx-auto mb-3" />
+              {experiences.map((exp) => (
+                <View key={exp.id} className="mb-4">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-xs font-bold text-gray-900">{exp.jobTitle || 'Job Title'}</Text>
+                    <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.endDate || 'Present'}</Text>
+                  </View>
+                  <Text className="text-[11px] font-medium text-gray-500 italic mb-1">{exp.company || 'Company'}</Text>
+                  {exp.description ? (
+                    <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {educations.length > 0 ? (
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center mb-2">Education</Text>
+              <View className="w-6 h-[1px] bg-gray-400 mx-auto mb-3" />
+              {educations.map((edu) => (
+                <View key={edu.id} className="mb-3">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="text-xs font-bold text-gray-900">{edu.degree || 'Degree/Certificate'}</Text>
+                    <Text className="text-[10px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.endDate || ''}</Text>
+                  </View>
+                  <Text className="text-[11px] font-medium text-gray-500 italic">{edu.school || 'School/University'}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+
+          {skills.length > 0 ? (
+            <View className="mb-6">
+              <Text className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center mb-2">Skills</Text>
+              <View className="w-6 h-[1px] bg-gray-400 mx-auto mb-3" />
+              <View className="flex-row flex-wrap justify-center gap-1.5">
+                {skills.map((skill, index) => (
+                  <View key={index} className="border border-gray-200 px-3 py-1 rounded-md">
+                    <Text className="text-gray-700 text-[10px] font-medium">{skill}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+        </View>
+      );
+    }
+
+    // --- Render Option 2: Creative Sidebar Layout ---
+    if (template === 'creative') {
+      return (
+        <View 
+          className="bg-white border border-gray-200 rounded-3xl min-h-[600px] mb-12 flex-row overflow-hidden"
+          style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            elevation: 4,
+          }}
+        >
+          {/* Left Sidebar */}
+          <View className="w-[35%] bg-gray-50 border-r border-gray-100 p-4 pt-6">
+            <Text className="text-lg font-extrabold text-gray-900 leading-tight mb-1">
+              {personalInfo.fullName || 'YOUR NAME'}
+            </Text>
+            <Text className="text-[9px] font-bold text-amber-600 uppercase tracking-wider mb-6">
+              {personalInfo.jobTitle || 'JOB TITLE'}
+            </Text>
+
+            <Text className="text-[9px] font-extrabold text-gray-900 uppercase tracking-widest border-b-2 border-amber-500 pb-1 mb-2">Contact</Text>
+            {personalInfo.email ? (
+              <View className="mb-2">
+                <Text className="text-[8px] font-bold text-gray-400 uppercase">Email</Text>
+                <Text className="text-[9px] text-gray-600 font-medium break-all">{personalInfo.email}</Text>
+              </View>
+            ) : null}
+            {personalInfo.phone ? (
+              <View className="mb-2">
+                <Text className="text-[8px] font-bold text-gray-400 uppercase">Phone</Text>
+                <Text className="text-[9px] text-gray-600 font-medium">{personalInfo.phone}</Text>
+              </View>
+            ) : null}
+            {personalInfo.address ? (
+              <View className="mb-2">
+                <Text className="text-[8px] font-bold text-gray-400 uppercase">Address</Text>
+                <Text className="text-[9px] text-gray-600 font-medium">{personalInfo.address}</Text>
+              </View>
+            ) : null}
+            {personalInfo.linkedin ? (
+              <View className="mb-4">
+                <Text className="text-[8px] font-bold text-gray-400 uppercase">LinkedIn</Text>
+                <Text className="text-[9px] text-gray-600 font-medium break-all">{personalInfo.linkedin}</Text>
+              </View>
+            ) : null}
+
+            {skills.length > 0 ? (
+              <View className="mt-4">
+                <Text className="text-[9px] font-extrabold text-gray-900 uppercase tracking-widest border-b-2 border-amber-500 pb-1 mb-3">Skills</Text>
+                <View className="flex-row flex-wrap gap-1">
+                  {skills.map((skill, index) => (
+                    <View key={index} className="bg-gray-900 px-2 py-1 rounded">
+                      <Text className="text-white text-[8px] font-bold">{skill}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </View>
+
+          {/* Right Main Content */}
+          <View className="w-[65%] p-4 pt-6 bg-white">
+            {summary ? (
+              <View className="mb-5">
+                <Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-2 pb-1 border-b border-gray-100">Profile Summary</Text>
+                <Text className="text-[11px] text-gray-600 leading-relaxed text-justify">{summary}</Text>
+              </View>
+            ) : null}
+
+            {experiences.length > 0 ? (
+              <View className="mb-5">
+                <Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-3 pb-1 border-b border-gray-100">Work Experience</Text>
+                {experiences.map((exp) => (
+                  <View key={exp.id} className="mb-3">
+                    <View className="flex-row justify-between items-start">
+                      <Text className="text-[11px] font-bold text-gray-800 flex-1 pr-2">{exp.jobTitle || 'Job Title'}</Text>
+                      <Text className="text-[9px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.endDate || ''}</Text>
+                    </View>
+                    <Text className="text-[10px] font-bold text-amber-600 italic mb-1">{exp.company || 'Company'}</Text>
+                    {exp.description ? (
+                      <Text className="text-[10px] text-gray-600 leading-normal text-justify">{exp.description}</Text>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
+            {educations.length > 0 ? (
+              <View className="mb-5">
+                <Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-3 pb-1 border-b border-gray-100">Education</Text>
+                {educations.map((edu) => (
+                  <View key={edu.id} className="mb-3">
+                    <View className="flex-row justify-between items-start">
+                      <Text className="text-[11px] font-bold text-gray-800 flex-1 pr-2">{edu.degree || 'Degree/Certificate'}</Text>
+                      <Text className="text-[9px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.endDate || ''}</Text>
+                    </View>
+                    <Text className="text-[10px] font-bold text-amber-600 italic">{edu.school || 'School/University'}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        </View>
+      );
+    }
+
+    // --- Render Option 3: Classic Corporate Layout (Default) ---
+    return (
+      <View 
+        className="bg-white border border-gray-200 rounded-3xl p-6 min-h-[600px] mb-12"
+        style={{
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 4,
+        }}
+      >
+        <View className="items-center mb-6">
+          <Text className="text-2xl font-extrabold text-gray-900 text-center mb-1">
+            {personalInfo.fullName || 'YOUR NAME'}
+          </Text>
+          <Text className="text-xs font-bold text-blue-600 uppercase tracking-widest text-center mb-3">
+            {personalInfo.jobTitle || 'PROFESSIONAL TITLE'}
+          </Text>
+          
+          <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
+            {personalInfo.email && <Text className="text-[10px] text-gray-500">{personalInfo.email}</Text>}
+            {personalInfo.phone && <Text className="text-[10px] text-gray-500">• {personalInfo.phone}</Text>}
+            {personalInfo.address && <Text className="text-[10px] text-gray-500">• {personalInfo.address}</Text>}
+            {personalInfo.linkedin && <Text className="text-[10px] text-gray-500">• {personalInfo.linkedin}</Text>}
+          </View>
+        </View>
+
+        <View className="border-b border-gray-100 mb-5" />
+
+        {summary ? (
+          <View className="mb-5">
+            <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-2">Professional Summary</Text>
+            <Text className="text-xs text-gray-600 leading-relaxed text-justify">{summary}</Text>
+            <View className="border-b border-gray-100 mt-4" />
+          </View>
+        ) : null}
+
+        {experiences.length > 0 ? (
+          <View className="mb-5">
+            <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-3">Work Experience</Text>
+            {experiences.map((exp) => (
+              <View key={exp.id} className="mb-4">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-xs font-bold text-gray-800">{exp.jobTitle || 'Job Title'}</Text>
+                  <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.endDate || 'Present'}</Text>
+                </View>
+                <Text className="text-[11px] font-semibold text-gray-500 italic mb-1">{exp.company || 'Company'}</Text>
+                {exp.description ? (
+                  <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text>
+                ) : null}
+              </View>
+            ))}
+            <View className="border-b border-gray-100 mt-2" />
+          </View>
+        ) : null}
+
+        {educations.length > 0 ? (
+          <View className="mb-5">
+            <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-3">Education</Text>
+            {educations.map((edu) => (
+              <View key={edu.id} className="mb-3">
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-xs font-bold text-gray-800">{edu.degree || 'Degree/Certificate'}</Text>
+                  <Text className="text-[10px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.endDate || ''}</Text>
+                </View>
+                <Text className="text-[11px] font-semibold text-gray-500 italic">{edu.school || 'School/University'}</Text>
+              </View>
+            ))}
+            <View className="border-b border-gray-100 mt-2" />
+          </View>
+        ) : null}
+
+        {skills.length > 0 ? (
+          <View className="mb-5">
+            <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-2">Skills</Text>
+            <View className="flex-row flex-wrap gap-1.5">
+              {skills.map((skill, index) => (
+                <View key={index} className="bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
+                  <Text className="text-blue-700 text-[10px] font-semibold">{skill}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* 1. Header Bar (Matching screenshot style: Back on left, Download on right) */}
+      {/* 1. Header Bar */}
       <View className="flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
         <TouchableOpacity 
           onPress={() => router.back()} 
@@ -724,97 +1358,7 @@ export default function CreateCVScreen() {
         ) : (
           /* Live Preview Sheet Mode */
           <ScrollView className="flex-1 bg-gray-100 p-6" showsVerticalScrollIndicator={false}>
-            <View 
-              className="bg-white border border-gray-200 rounded-3xl p-6 min-h-[600px] mb-12"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.08,
-                shadowRadius: 12,
-                elevation: 4,
-              }}
-            >
-              
-              {/* Preview Header */}
-              <View className="items-center mb-6">
-                <Text className="text-2xl font-extrabold text-gray-900 text-center mb-1">
-                  {personalInfo.fullName || 'YOUR NAME'}
-                </Text>
-                <Text className="text-xs font-bold text-blue-600 uppercase tracking-widest text-center mb-3">
-                  {personalInfo.jobTitle || 'PROFESSIONAL TITLE'}
-                </Text>
-                
-                <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
-                  {personalInfo.email && <Text className="text-[10px] text-gray-500">{personalInfo.email}</Text>}
-                  {personalInfo.phone && <Text className="text-[10px] text-gray-500">• {personalInfo.phone}</Text>}
-                  {personalInfo.address && <Text className="text-[10px] text-gray-500">• {personalInfo.address}</Text>}
-                  {personalInfo.linkedin && <Text className="text-[10px] text-gray-500">• {personalInfo.linkedin}</Text>}
-                </View>
-              </View>
-
-              <View className="border-b border-gray-100 mb-5" />
-
-              {/* Preview Summary */}
-              {summary ? (
-                <View className="mb-5">
-                  <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-2">Professional Summary</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed text-justify">{summary}</Text>
-                  <View className="border-b border-gray-100 mt-4" />
-                </View>
-              ) : null}
-
-              {/* Preview Experience */}
-              {experiences.length > 0 ? (
-                <View className="mb-5">
-                  <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-3">Work Experience</Text>
-                  {experiences.map((exp) => (
-                    <View key={exp.id} className="mb-4">
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-xs font-bold text-gray-800">{exp.jobTitle || 'Job Title'}</Text>
-                        <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.endDate || 'Present'}</Text>
-                      </View>
-                      <Text className="text-[11px] font-semibold text-gray-500 italic mb-1">{exp.company || 'Company'}</Text>
-                      {exp.description ? (
-                        <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text>
-                      ) : null}
-                    </View>
-                  ))}
-                  <View className="border-b border-gray-100 mt-2" />
-                </View>
-              ) : null}
-
-              {/* Preview Education */}
-              {educations.length > 0 ? (
-                <View className="mb-5">
-                  <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-3">Education</Text>
-                  {educations.map((edu) => (
-                    <View key={edu.id} className="mb-3">
-                      <View className="flex-row justify-between items-center">
-                        <Text className="text-xs font-bold text-gray-800">{edu.degree || 'Degree/Certificate'}</Text>
-                        <Text className="text-[10px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.endDate || ''}</Text>
-                      </View>
-                      <Text className="text-[11px] font-semibold text-gray-500 italic">{edu.school || 'School/University'}</Text>
-                    </View>
-                  ))}
-                  <View className="border-b border-gray-100 mt-2" />
-                </View>
-              ) : null}
-
-              {/* Preview Skills */}
-              {skills.length > 0 ? (
-                <View className="mb-5">
-                  <Text className="text-[11px] font-extrabold text-blue-600 uppercase tracking-wider mb-2">Skills</Text>
-                  <View className="flex-row flex-wrap gap-1.5">
-                    {skills.map((skill, index) => (
-                      <View key={index} className="bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
-                        <Text className="text-blue-700 text-[10px] font-semibold">{skill}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              ) : null}
-              
-            </View>
+            {renderLivePreview()}
           </ScrollView>
         )}
       </KeyboardAvoidingView>

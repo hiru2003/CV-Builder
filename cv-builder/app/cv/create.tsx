@@ -7,9 +7,9 @@ import * as Sharing from 'expo-sharing';
 import * as ImagePicker from 'expo-image-picker';
 
 // --- Type Definitions ---
-type PersonalInfo = { fullName: string; jobTitle: string; email: string; phone: string; address: string; linkedin: string; };
-type Experience = { id: string; jobTitle: string; company: string; startDate: string; endDate: string; description: string; };
-type Education = { id: string; degree: string; school: string; startDate: string; endDate: string; };
+type PersonalInfo = { fullName: string; jobTitle: string; email: string; phone: string; address: string; linkedin: string; github: string; };
+type Experience = { id: string; jobTitle: string; company: string; startDate: string; endDate: string; description: string; location: string; current: boolean; };
+type Education = { id: string; degree: string; school: string; startDate: string; endDate: string; fieldOfStudy: string; current: boolean; gpa: string; };
 
 const TABS = ['PERSONAL', 'EXPERIENCE', 'EDUCATION', 'SKILLS', 'SUMMARY'] as const;
 type TabType = typeof TABS[number];
@@ -26,7 +26,7 @@ export default function CreateCVScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('PERSONAL');
   
   // --- Form Data State ---
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({ fullName: '', jobTitle: '', email: '', phone: '', address: '', linkedin: '' });
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({ fullName: '', jobTitle: '', email: '', phone: '', address: '', linkedin: '', github: '' });
   const [photoInfo, setPhotoInfo] = useState<{ uri: string; base64: string } | null>(null);
   const [summary, setSummary] = useState('');
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -65,11 +65,20 @@ export default function CreateCVScreen() {
 
   // --- Handlers for Experience ---
   const addExperience = () => {
-    setExperiences([...experiences, { id: Date.now().toString(), jobTitle: '', company: '', startDate: '', endDate: '', description: '' }]);
+    setExperiences([...experiences, { id: Date.now().toString(), jobTitle: '', company: '', startDate: '', endDate: '', description: '', location: '', current: false }]);
   };
 
-  const updateExperience = (id: string, field: keyof Experience, value: string) => {
-    setExperiences(experiences.map(exp => exp.id === id ? { ...exp, [field]: value } : exp));
+  const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
+    setExperiences(experiences.map(exp => {
+      if (exp.id === id) {
+        const updated = { ...exp, [field]: value };
+        if (field === 'current' && value === true) {
+          updated.endDate = 'Present';
+        }
+        return updated;
+      }
+      return exp;
+    }));
   };
 
   const removeExperience = (id: string) => {
@@ -78,11 +87,20 @@ export default function CreateCVScreen() {
 
   // --- Handlers for Education ---
   const addEducation = () => {
-    setEducations([...educations, { id: Date.now().toString(), degree: '', school: '', startDate: '', endDate: '' }]);
+    setEducations([...educations, { id: Date.now().toString(), degree: '', school: '', startDate: '', endDate: '', fieldOfStudy: '', current: false, gpa: '' }]);
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: string) => {
-    setEducations(educations.map(edu => edu.id === id ? { ...edu, [field]: value } : edu));
+  const updateEducation = (id: string, field: keyof Education, value: string | boolean) => {
+    setEducations(educations.map(edu => {
+      if (edu.id === id) {
+        const updated = { ...edu, [field]: value };
+        if (field === 'current' && value === true) {
+          updated.endDate = 'Present';
+        }
+        return updated;
+      }
+      return edu;
+    }));
   };
 
   const removeEducation = (id: string) => {
@@ -107,9 +125,11 @@ export default function CreateCVScreen() {
       <div class="item">
         <div class="item-header">
           <span class="item-title">${exp.jobTitle || 'Job Title'}</span>
-          <span class="item-date">${exp.startDate || ''} - ${exp.endDate || 'Present'}</span>
+          <span class="item-date">${exp.startDate || ''} - ${exp.current ? 'Present' : (exp.endDate || '')}</span>
         </div>
-        <div class="item-sub">${exp.company || 'Company'}</div>
+        <div class="item-sub">
+          ${exp.company || 'Company'} ${exp.location ? `• ${exp.location}` : ''}
+        </div>
         <div class="item-desc">${exp.description ? exp.description.replace(/\n/g, '<br/>') : ''}</div>
       </div>
     `).join('');
@@ -117,10 +137,12 @@ export default function CreateCVScreen() {
     const educationsHTML = educations.map(edu => `
       <div class="item">
         <div class="item-header">
-          <span class="item-title">${edu.degree || 'Degree/Certificate'}</span>
-          <span class="item-date">${edu.startDate || ''} - ${edu.endDate || ''}</span>
+          <span class="item-title">${edu.degree || 'Degree'} ${edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}</span>
+          <span class="item-date">${edu.startDate || ''} - ${edu.current ? 'Present' : (edu.endDate || '')}</span>
         </div>
-        <div class="item-sub">${edu.school || 'School/University'}</div>
+        <div class="item-sub">
+          ${edu.school || 'School'} ${edu.gpa ? `• GPA: ${edu.gpa}` : ''}
+        </div>
       </div>
     `).join('');
 
@@ -166,6 +188,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<span>•</span><span>${personalInfo.phone}</span>` : ''}
               ${personalInfo.address ? `<span>•</span><span>${personalInfo.address}</span>` : ''}
               ${personalInfo.linkedin ? `<span>•</span><span>${personalInfo.linkedin}</span>` : ''}
+              ${personalInfo.github ? `<span>•</span><span>${personalInfo.github}</span>` : ''}
             </div>
           </div>
           ${summary ? `<div class="section"><div class="section-title">Professional Summary</div><div class="summary-text">${summary}</div></div>` : ''}
@@ -212,6 +235,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<span>${personalInfo.phone}</span>` : ''}
               ${personalInfo.address ? `<span>${personalInfo.address}</span>` : ''}
               ${personalInfo.linkedin ? `<span>${personalInfo.linkedin}</span>` : ''}
+              ${personalInfo.github ? `<span>${personalInfo.github}</span>` : ''}
             </div>
           </div>
           ${summary ? `<div class="section"><div class="section-title">Professional Summary</div><div class="summary-text">${summary}</div></div>` : ''}
@@ -239,7 +263,7 @@ export default function CreateCVScreen() {
             .name { font-size: 22px; font-weight: 800; color: #111827; line-height: 1.2; margin-bottom: 6px; }
             .title { font-size: 12px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; }
             .sidebar-title { font-size: 11px; font-weight: bold; text-transform: uppercase; color: #111827; border-bottom: 2px solid #d97706; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; }
-            .contact-item { margin-bottom: 10px; font-size: 11px; color: #4b5563; }
+            .contact-item { margin-bottom: 10px; font-size: 11px; color: #4b5563; word-wrap: break-word; }
             .contact-label { font-weight: bold; color: #111827; display: block; margin-bottom: 2px; }
             .section { margin-bottom: 22px; }
             .section-title { font-size: 13px; font-weight: bold; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 14px; text-transform: uppercase; }
@@ -262,6 +286,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<div class="contact-item"><span class="contact-label">Phone</span>${personalInfo.phone}</div>` : ''}
               ${personalInfo.address ? `<div class="contact-item"><span class="contact-label">Address</span>${personalInfo.address}</div>` : ''}
               ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-label">LinkedIn</span>${personalInfo.linkedin}</div>` : ''}
+              ${personalInfo.github ? `<div class="contact-item"><span class="contact-label">GitHub</span>${personalInfo.github}</div>` : ''}
               ${skills.length > 0 ? `<div class="sidebar-title">Skills</div><div style="margin-top: 8px;">${skillsHTML}</div>` : ''}
             </div>
             <div class="main-content">
@@ -313,6 +338,7 @@ export default function CreateCVScreen() {
                 ${personalInfo.phone ? `<span>• ${personalInfo.phone}</span>` : ''}
                 ${personalInfo.address ? `<span>• ${personalInfo.address}</span>` : ''}
                 ${personalInfo.linkedin ? `<span>• ${personalInfo.linkedin}</span>` : ''}
+                ${personalInfo.github ? `<span>• ${personalInfo.github}</span>` : ''}
               </div>
             </div>
           </div>
@@ -362,6 +388,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<span>• ${personalInfo.phone}</span>` : ''}
               ${personalInfo.address ? `<span>• ${personalInfo.address}</span>` : ''}
               ${personalInfo.linkedin ? `<span>• ${personalInfo.linkedin}</span>` : ''}
+              ${personalInfo.github ? `<span>• ${personalInfo.github}</span>` : ''}
             </div>
           </div>
           <div class="timeline-container">
@@ -413,6 +440,7 @@ export default function CreateCVScreen() {
                 ${personalInfo.phone ? `<span>• ${personalInfo.phone}</span>` : ''}
                 ${personalInfo.address ? `<span>• ${personalInfo.address}</span>` : ''}
                 ${personalInfo.linkedin ? `<span>• ${personalInfo.linkedin}</span>` : ''}
+                ${personalInfo.github ? `<span>• ${personalInfo.github}</span>` : ''}
               </div>
             </div>
             ${photoHTML}
@@ -467,6 +495,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<div>${personalInfo.phone}</div>` : ''}
               ${personalInfo.address ? `<div>${personalInfo.address}</div>` : ''}
               ${personalInfo.linkedin ? `<div>${personalInfo.linkedin}</div>` : ''}
+              ${personalInfo.github ? `<div>${personalInfo.github}</div>` : ''}
             </div>
           </div>
           ${summary ? `<div class="section"><div class="section-title">Summary</div><div class="summary-text">${summary}</div></div>` : ''}
@@ -513,6 +542,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<span>• ${personalInfo.phone}</span>` : ''}
               ${personalInfo.address ? `<span>• ${personalInfo.address}</span>` : ''}
               ${personalInfo.linkedin ? `<span>• ${personalInfo.linkedin}</span>` : ''}
+              ${personalInfo.github ? `<span>• ${personalInfo.github}</span>` : ''}
             </div>
           </div>
           ${summary ? `<div class="section"><div class="section-title">Summary</div><div class="summary-text">${summary}</div></div>` : ''}
@@ -557,6 +587,7 @@ export default function CreateCVScreen() {
               ${personalInfo.phone ? `<span>• ${personalInfo.phone}</span>` : ''}
               ${personalInfo.address ? `<span>• ${personalInfo.address}</span>` : ''}
               ${personalInfo.linkedin ? `<span>• ${personalInfo.linkedin}</span>` : ''}
+              ${personalInfo.github ? `<span>• ${personalInfo.github}</span>` : ''}
             </div>
           </div>
           ${summary ? `<div class="section"><div class="section-title">> Professional Summary</div><div class="summary-text">${summary}</div></div>` : ''}
@@ -577,7 +608,7 @@ export default function CreateCVScreen() {
         <style>
           body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937; margin: 0; padding: 0; font-size: 12px; }
           .wrapper { display: table; width: 100%; min-height: 100vh; }
-          .split-left { display: table-cell; width: 38%; bg-color: #1f2937; background-color: #1f2937; color: white; padding: 30px 20px; vertical-align: top; }
+          .split-left { display: table-cell; width: 38%; background-color: #1f2937; color: white; padding: 30px 20px; vertical-align: top; }
           .split-right { display: table-cell; width: 62%; padding: 30px 25px; vertical-align: top; }
           .profile-photo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #9ca3af; margin-bottom: 20px; object-fit: cover; }
           .name { font-size: 24px; font-weight: bold; margin-bottom: 4px; }
@@ -606,6 +637,7 @@ export default function CreateCVScreen() {
             ${personalInfo.phone ? `<div class="contact-item"><span class="contact-label">Phone</span>${personalInfo.phone}</div>` : ''}
             ${personalInfo.address ? `<div class="contact-item"><span class="contact-label">Address</span>${personalInfo.address}</div>` : ''}
             ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-label">LinkedIn</span>${personalInfo.linkedin}</div>` : ''}
+            ${personalInfo.github ? `<div class="contact-item"><span class="contact-label">GitHub</span>${personalInfo.github}</div>` : ''}
             ${skills.length > 0 ? `<div class="split-title">Skills</div><div style="margin-top: 8px;">${skillsHTML}</div>` : ''}
           </div>
           <div class="split-right">
@@ -637,6 +669,77 @@ export default function CreateCVScreen() {
       <Image source={{ uri: photoInfo.uri }} style={styles.previewPhoto} />
     ) : null;
 
+    // Helper: Contact Row Details
+    const renderContactDetails = () => (
+      <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
+        {personalInfo.email && <Text className="text-[10px] text-gray-500">{personalInfo.email}</Text>}
+        {personalInfo.phone && <Text className="text-[10px] text-gray-500">• {personalInfo.phone}</Text>}
+        {personalInfo.address && <Text className="text-[10px] text-gray-500">• {personalInfo.address}</Text>}
+        {personalInfo.linkedin && <Text className="text-[10px] text-gray-500">• {personalInfo.linkedin}</Text>}
+        {personalInfo.github && <Text className="text-[10px] text-gray-500">• {personalInfo.github}</Text>}
+      </View>
+    );
+
+    // Helper: Render Experience List
+    const renderExperiencePreview = (color: string) => {
+      if (experiences.length === 0) return null;
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Work Experience</Text>
+          {experiences.map((exp) => (
+            <View key={exp.id} className="mb-4">
+              <View className="flex-row justify-between items-start">
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{exp.jobTitle || 'Job Title'}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.current ? 'Present' : (exp.endDate || '')}</Text>
+              </View>
+              <Text className="text-[11px] font-semibold text-gray-500 italic mb-1">
+                {exp.company || 'Company'} {exp.location ? `• ${exp.location}` : ''}
+              </Text>
+              {exp.description ? <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text> : null}
+            </View>
+          ))}
+        </View>
+      );
+    };
+
+    // Helper: Render Education List
+    const renderEducationPreview = (color: string) => {
+      if (educations.length === 0) return null;
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Education</Text>
+          {educations.map((edu) => (
+            <View key={edu.id} className="mb-3">
+              <View className="flex-row justify-between items-start">
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{edu.degree || 'Degree'} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.current ? 'Present' : (edu.endDate || '')}</Text>
+              </View>
+              <Text className="text-[11px] font-semibold text-gray-500 italic">
+                {edu.school || 'School'} {edu.gpa ? `• GPA: ${edu.gpa}` : ''}
+              </Text>
+            </View>
+          ))}
+        </View>
+      );
+    };
+
+    // Helper: Render Skills tags
+    const renderSkillsPreview = (color: string, bg: string, border: string) => {
+      if (skills.length === 0) return null;
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color }}>Skills</Text>
+          <View className="flex-row flex-wrap gap-1.5">
+            {skills.map((skill, index) => (
+              <View key={index} className="px-2.5 py-1 rounded-full border" style={{ backgroundColor: bg, borderColor: border }}>
+                <Text className="text-[10px] font-semibold" style={{ color }}>{skill}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      );
+    };
+
     // 1. MODERN MINIMALIST (ATS)
     if (template === 'modern') {
       return (
@@ -653,6 +756,7 @@ export default function CreateCVScreen() {
               {personalInfo.phone && <Text className="text-[10px] text-gray-600">• {personalInfo.phone}</Text>}
               {personalInfo.address && <Text className="text-[10px] text-gray-600">• {personalInfo.address}</Text>}
               {personalInfo.linkedin && <Text className="text-[10px] text-gray-600">• {personalInfo.linkedin}</Text>}
+              {personalInfo.github && <Text className="text-[10px] text-gray-600">• {personalInfo.github}</Text>}
             </View>
           </View>
           {summary ? (
@@ -662,22 +766,9 @@ export default function CreateCVScreen() {
               <Text className="text-xs text-gray-600 leading-relaxed text-center">{summary}</Text>
             </View>
           ) : null}
-          {experiences.length > 0 ? (
-            <View className="mb-6">
-              <Text className="text-xs font-bold text-gray-900 uppercase tracking-widest text-center mb-2">Work Experience</Text>
-              <View className="w-6 h-[1px] bg-gray-400 mx-auto mb-3" />
-              {experiences.map((exp) => (
-                <View key={exp.id} className="mb-4">
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-xs font-bold text-gray-900">{exp.jobTitle || 'Job Title'}</Text>
-                    <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.endDate || 'Present'}</Text>
-                  </View>
-                  <Text className="text-[11px] font-medium text-gray-500 italic mb-1">{exp.company || 'Company'}</Text>
-                  {exp.description ? <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text> : null}
-                </View>
-              ))}
-            </View>
-          ) : null}
+          {renderExperiencePreview('#111827')}
+          {renderEducationPreview('#111827')}
+          {renderSkillsPreview('#374151', '#f9fafb', '#e5e7eb')}
         </View>
       );
     }
@@ -690,9 +781,14 @@ export default function CreateCVScreen() {
             {photoPreview}
             <Text className="text-lg font-extrabold text-gray-900 leading-tight mb-1">{personalInfo.fullName || 'YOUR NAME'}</Text>
             <Text className="text-[9px] font-bold text-amber-600 uppercase tracking-wider mb-6">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+            
             <Text className="text-[9px] font-extrabold text-gray-900 uppercase tracking-widest border-b-2 border-amber-500 pb-1 mb-2">Contact</Text>
             {personalInfo.email && <View className="mb-2"><Text className="text-[8px] font-bold text-gray-400 uppercase">Email</Text><Text className="text-[9px] text-gray-600 break-all">{personalInfo.email}</Text></View>}
             {personalInfo.phone && <View className="mb-2"><Text className="text-[8px] font-bold text-gray-400 uppercase">Phone</Text><Text className="text-[9px] text-gray-600">{personalInfo.phone}</Text></View>}
+            {personalInfo.address && <View className="mb-2"><Text className="text-[8px] font-bold text-gray-400 uppercase">Address</Text><Text className="text-[9px] text-gray-600">{personalInfo.address}</Text></View>}
+            {personalInfo.linkedin && <View className="mb-2"><Text className="text-[8px] font-bold text-gray-400 uppercase">LinkedIn</Text><Text className="text-[9px] text-gray-600 break-all">{personalInfo.linkedin}</Text></View>}
+            {personalInfo.github && <View className="mb-2"><Text className="text-[8px] font-bold text-gray-400 uppercase">GitHub</Text><Text className="text-[9px] text-gray-600 break-all">{personalInfo.github}</Text></View>}
+            
             {skills.length > 0 && (
               <View className="mt-4">
                 <Text className="text-[9px] font-extrabold text-gray-900 uppercase tracking-widest border-b-2 border-amber-500 pb-1 mb-3">Skills</Text>
@@ -702,7 +798,8 @@ export default function CreateCVScreen() {
           </View>
           <View className="w-[65%] p-4 pt-6 bg-white">
             {summary ? <View className="mb-5"><Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-2 pb-1 border-b border-gray-100">Summary</Text><Text className="text-[11px] text-gray-600 leading-relaxed text-justify">{summary}</Text></View> : null}
-            {experiences.length > 0 && <View className="mb-5"><Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-3 pb-1 border-b border-gray-100">Experience</Text>{experiences.map((exp) => (<View key={exp.id} className="mb-3"><Text className="text-[11px] font-bold text-gray-800">{exp.jobTitle}</Text><Text className="text-[9px] text-gray-400">{exp.startDate} - {exp.endDate}</Text></View>))}</View>}
+            {renderExperiencePreview('#111827')}
+            {renderEducationPreview('#111827')}
           </View>
         </View>
       );
@@ -717,11 +814,18 @@ export default function CreateCVScreen() {
             <View className="flex-1">
               <Text className="text-white text-xl font-bold">{personalInfo.fullName || 'YOUR NAME'}</Text>
               <Text className="text-blue-400 text-xs uppercase font-semibold">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+              <View className="flex-row flex-wrap gap-2 mt-2">
+                {personalInfo.email && <Text className="text-[9px] text-gray-300">{personalInfo.email}</Text>}
+                {personalInfo.phone && <Text className="text-[9px] text-gray-300">• {personalInfo.phone}</Text>}
+                {personalInfo.github && <Text className="text-[9px] text-gray-300">• {personalInfo.github}</Text>}
+              </View>
             </View>
           </View>
           <View className="p-6">
             {summary ? <View className="mb-4"><Text className="font-bold border-b border-gray-100 pb-1 text-xs">Summary</Text><Text className="text-xs text-gray-600 mt-2">{summary}</Text></View> : null}
-            {skills.length > 0 && <View className="mb-4"><Text className="font-bold border-b border-gray-100 pb-1 text-xs">Skills</Text><View className="flex-row flex-wrap gap-1 mt-2">{skills.map((s, i) => (<View key={i} className="bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-full"><Text className="text-gray-700 text-[10px] font-semibold">{s}</Text></View>))}</View></View>}
+            {renderExperiencePreview('#1f2937')}
+            {renderEducationPreview('#1f2937')}
+            {renderSkillsPreview('#1f2937', '#f3f4f6', '#e5e7eb')}
           </View>
         </View>
       );
@@ -735,7 +839,9 @@ export default function CreateCVScreen() {
           <Text className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
           <View className="border-l-2 border-emerald-500 pl-4 ml-1">
             {summary ? <View className="mb-5"><Text className="text-[10px] font-bold text-gray-900 uppercase">Summary</Text><Text className="text-xs text-gray-600 mt-1">{summary}</Text></View> : null}
-            {skills.length > 0 && <View className="mb-5"><Text className="text-[10px] font-bold text-gray-900 uppercase">Skills</Text><View className="flex-row flex-wrap gap-1 mt-2">{skills.map((s, i) => (<View key={i} className="bg-emerald-50 border border-emerald-100 px-2 py-1 rounded"><Text className="text-emerald-700 text-[9px] font-bold">{s}</Text></View>))}</View></View>}
+            {renderExperiencePreview('#111827')}
+            {renderEducationPreview('#111827')}
+            {renderSkillsPreview('#065f46', '#ecfdf5', '#a7f3d0')}
           </View>
         </View>
       );
@@ -749,15 +855,21 @@ export default function CreateCVScreen() {
             <View className="flex-1">
               <Text className="text-white text-xl font-bold font-serif">{personalInfo.fullName || 'YOUR NAME'}</Text>
               <Text className="text-amber-500 text-[10px] uppercase font-bold tracking-wider mt-1">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+              <View className="flex-row flex-wrap gap-2 mt-2">
+                {personalInfo.email && <Text className="text-[9px] text-slate-300">{personalInfo.email}</Text>}
+                {personalInfo.linkedin && <Text className="text-[9px] text-slate-300">• {personalInfo.linkedin}</Text>}
+              </View>
             </View>
             {photoPreview}
           </View>
           <View className="p-5 flex-row gap-4">
-            <View className="w-[60%]">
-              {summary ? <View className="mb-4"><Text className="font-bold text-blue-900 border-b border-gray-150 pb-1 text-xs">Summary</Text><Text className="text-xs text-gray-600 mt-2">{summary}</Text></View> : null}
+            <View className="w-[65%]">
+              {summary ? <View className="mb-4"><Text className="font-bold text-indigo-900 border-b border-gray-150 pb-1 text-xs">Summary</Text><Text className="text-xs text-gray-600 mt-2">{summary}</Text></View> : null}
+              {renderExperiencePreview('#1e1b4b')}
             </View>
-            <View className="w-[40%]">
-              {skills.length > 0 && <View className="mb-4"><Text className="font-bold text-blue-900 border-b border-gray-150 pb-1 text-xs">Skills</Text><View className="flex-row flex-wrap gap-1 mt-2">{skills.map((s, i) => (<View key={i} className="bg-indigo-950 px-2 py-1 rounded"><Text className="text-white text-[8px] font-bold">{s}</Text></View>))}</View></View>}
+            <View className="w-[35%]">
+              {renderEducationPreview('#1e1b4b')}
+              {renderSkillsPreview('#1e1b4b', '#f3f4f6', '#e5e7eb')}
             </View>
           </View>
         </View>
@@ -773,9 +885,15 @@ export default function CreateCVScreen() {
               <Text className="text-lg font-bold text-teal-600">{personalInfo.fullName || 'YOUR NAME'}</Text>
               <Text className="text-[10px] text-gray-500 font-bold">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
             </View>
+            <View className="items-end">
+              {personalInfo.email && <Text className="text-[9px] text-gray-500">{personalInfo.email}</Text>}
+              {personalInfo.phone && <Text className="text-[9px] text-gray-500">{personalInfo.phone}</Text>}
+            </View>
           </View>
           {summary ? <View className="mb-3"><Text className="text-[9px] font-bold text-teal-600 uppercase">Summary</Text><Text className="text-xs text-gray-600 mt-1">{summary}</Text></View> : null}
-          {skills.length > 0 && <View className="mb-3"><Text className="text-[9px] font-bold text-teal-600 uppercase">Skills</Text><View className="flex-row flex-wrap gap-1 mt-1">{skills.map((s, i) => (<View key={i} className="bg-teal-50 border border-teal-100 px-2 py-0.5 rounded"><Text className="text-teal-800 text-[9px] font-semibold">{s}</Text></View>))}</View></View>}
+          {renderExperiencePreview('#0d9488')}
+          {renderEducationPreview('#0d9488')}
+          {renderSkillsPreview('#115e59', '#f0fdf4', '#ccfbf1')}
         </View>
       );
     }
@@ -787,8 +905,12 @@ export default function CreateCVScreen() {
           {photoPreview}
           <Text className="text-2xl font-bold text-red-600 mt-2">{personalInfo.fullName || 'YOUR NAME'}</Text>
           <Text className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
-          <View className="w-full mt-6">
+          {renderContactDetails()}
+          <View className="w-full mt-6 text-left">
             {summary ? <View className="mb-4"><Text className="bg-red-600 text-white text-xs px-3 py-1 rounded font-bold">Summary</Text><Text className="text-xs text-gray-600 mt-2">{summary}</Text></View> : null}
+            {renderExperiencePreview('#dc2626')}
+            {renderEducationPreview('#dc2626')}
+            {renderSkillsPreview('#991b1b', '#fef2f2', '#fee2e2')}
           </View>
         </View>
       );
@@ -801,8 +923,11 @@ export default function CreateCVScreen() {
           <View className="border-l-4 border-emerald-600 pl-3 mb-5">
             <Text className="text-xl font-bold text-gray-900">{personalInfo.fullName || 'YOUR NAME'}</Text>
             <Text className="text-xs text-emerald-600 font-semibold">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+            {renderContactDetails()}
           </View>
           {summary ? <View className="mb-4 pl-3 border-l border-gray-200"><Text className="text-xs font-bold text-emerald-600">{'> SUMMARY'}</Text><Text className="text-xs text-gray-600 mt-1">{summary}</Text></View> : null}
+          {renderExperiencePreview('#059669')}
+          {renderEducationPreview('#059669')}
           {skills.length > 0 && <View className="mb-4 pl-3 border-l border-gray-200"><Text className="text-xs font-bold text-emerald-600">{'> SKILLS'}</Text><View className="flex-row flex-wrap gap-1 mt-2">{skills.map((s, i) => (<View key={i} className="bg-slate-900 px-2 py-0.5 rounded"><Text className="text-emerald-400 text-[9px] font-mono">{s}</Text></View>))}</View></View>}
         </View>
       );
@@ -816,6 +941,11 @@ export default function CreateCVScreen() {
             {photoPreview}
             <Text className="text-white text-lg font-bold">{personalInfo.fullName || 'YOUR NAME'}</Text>
             <Text className="text-gray-300 text-[9px] uppercase tracking-wider mb-4">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+            
+            <Text className="text-white text-[9px] font-bold border-b border-slate-700 pb-1 mb-2">CONTACT</Text>
+            {personalInfo.email && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.email}</Text>}
+            {personalInfo.phone && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.phone}</Text>}
+            
             {skills.length > 0 && (
               <View className="mt-4">
                 <Text className="text-white text-[9px] font-bold border-b border-slate-700 pb-1 mb-2">SKILLS</Text>
@@ -825,6 +955,8 @@ export default function CreateCVScreen() {
           </View>
           <View className="w-[60%] p-4 pt-6 bg-white">
             {summary ? <View className="mb-4"><Text className="text-gray-900 font-bold border-b border-gray-150 pb-1 text-[10px]">SUMMARY</Text><Text className="text-[11px] text-gray-600 mt-2">{summary}</Text></View> : null}
+            {renderExperiencePreview('#1f2937')}
+            {renderEducationPreview('#1f2937')}
           </View>
         </View>
       );
@@ -836,12 +968,7 @@ export default function CreateCVScreen() {
         <View className="items-center mb-6">
           <Text className="text-2xl font-extrabold text-gray-900 text-center mb-1">{personalInfo.fullName || 'YOUR NAME'}</Text>
           <Text className="text-xs font-bold text-blue-600 uppercase tracking-widest text-center mb-3">{personalInfo.jobTitle || 'PROFESSIONAL TITLE'}</Text>
-          <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
-            {personalInfo.email && <Text className="text-[10px] text-gray-500">{personalInfo.email}</Text>}
-            {personalInfo.phone && <Text className="text-[10px] text-gray-500">• {personalInfo.phone}</Text>}
-            {personalInfo.address && <Text className="text-[10px] text-gray-500">• {personalInfo.address}</Text>}
-            {personalInfo.linkedin && <Text className="text-[10px] text-gray-500">• {personalInfo.linkedin}</Text>}
-          </View>
+          {renderContactDetails()}
         </View>
         <View className="border-b border-gray-100 mb-5" />
         {summary ? (
@@ -851,6 +978,9 @@ export default function CreateCVScreen() {
             <View className="border-b border-gray-100 mt-4" />
           </View>
         ) : null}
+        {renderExperiencePreview('#2563eb')}
+        {renderEducationPreview('#2563eb')}
+        {renderSkillsPreview('#1e40af', '#eff6ff', '#dbeafe')}
       </View>
     );
   };
@@ -944,7 +1074,7 @@ export default function CreateCVScreen() {
                         {photoInfo ? (
                           <Image 
                             source={{ uri: photoInfo.uri }} 
-                            className="w-20 h-20 rounded-full border border-gray-200" 
+                            className="w-20 h-20 rounded-full border border-gray-250 bg-gray-200" 
                           />
                         ) : (
                           <View className="w-20 h-20 rounded-full bg-gray-200 items-center justify-center border border-dashed border-gray-300">
@@ -996,9 +1126,15 @@ export default function CreateCVScreen() {
                     <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="City, Country" placeholderTextColor="#9CA3AF" value={personalInfo.address} onChangeText={t => setPersonalInfo({...personalInfo, address: t})} />
                   </View>
 
-                  <View className="mb-4">
-                    <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">LINKEDIN URL</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="https://linkedin.com/in/username" placeholderTextColor="#9CA3AF" value={personalInfo.linkedin} onChangeText={t => setPersonalInfo({...personalInfo, linkedin: t})} autoCapitalize="none" />
+                  <View className="flex-row justify-between gap-4">
+                    <View className="flex-1 mb-4">
+                      <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">LINKEDIN URL</Text>
+                      <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium text-sm" placeholder="linkedin.com/in/johndoe" placeholderTextColor="#9CA3AF" value={personalInfo.linkedin} onChangeText={t => setPersonalInfo({...personalInfo, linkedin: t})} autoCapitalize="none" />
+                    </View>
+                    <View className="flex-1 mb-4">
+                      <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">GITHUB URL</Text>
+                      <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium text-sm" placeholder="github.com/johndoe" placeholderTextColor="#9CA3AF" value={personalInfo.github} onChangeText={t => setPersonalInfo({...personalInfo, github: t})} autoCapitalize="none" />
+                    </View>
                   </View>
 
                   <View className="flex-row justify-end mt-8">
@@ -1013,42 +1149,97 @@ export default function CreateCVScreen() {
               {/* TAB: EXPERIENCE */}
               {activeTab === 'EXPERIENCE' && (
                 <View className="pb-10">
-                  <Text className="text-3xl font-extrabold text-gray-900 mb-6">Work Experience</Text>
+                  <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-3xl font-extrabold text-gray-900">Experience</Text>
+                    <TouchableOpacity 
+                      onPress={addExperience} 
+                      className="flex-row items-center bg-blue-50 border border-blue-100 rounded-full px-4 py-2"
+                    >
+                      <Ionicons name="add" size={16} color="#2563eb" />
+                      <Text className="text-blue-600 font-bold text-xs ml-1">Add Experience</Text>
+                    </TouchableOpacity>
+                  </View>
+
                   {experiences.map((exp, index) => (
-                    <View key={exp.id} className="mb-6 bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                      <View className="flex-row justify-between items-center mb-4">
-                        <Text className="font-bold text-gray-700">Experience {index + 1}</Text>
-                        <TouchableOpacity onPress={() => removeExperience(exp.id)} className="p-1"><Ionicons name="trash-outline" size={18} color="#ef4444" /></TouchableOpacity>
+                    <View key={exp.id} className="mb-6 bg-white border border-gray-150 rounded-3xl p-5" style={styles.previewShadow}>
+                      <View className="flex-row justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                        <Text className="font-extrabold text-gray-800">Experience {index + 1}</Text>
+                        <TouchableOpacity onPress={() => removeExperience(exp.id)} className="p-1">
+                          <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                        </TouchableOpacity>
                       </View>
+                      
                       <View className="space-y-4 gap-3">
-                        <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1">JOB TITLE</Text>
-                          <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="e.g. Senior Developer" value={exp.jobTitle} onChangeText={t => updateExperience(exp.id, 'jobTitle', t)} />
-                        </View>
-                        <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1">COMPANY</Text>
-                          <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="e.g. Acme Corp" value={exp.company} onChangeText={t => updateExperience(exp.id, 'company', t)} />
-                        </View>
-                        <View className="flex-row justify-between">
-                          <View className="w-[48%]">
-                            <Text className="text-[10px] font-bold text-gray-500 mb-1">START DATE</Text>
-                            <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="MM/YYYY" value={exp.startDate} onChangeText={t => updateExperience(exp.id, 'startDate', t)} />
+                        <View className="flex-row gap-4">
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Company</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Google" placeholderTextColor="#9CA3AF" value={exp.company} onChangeText={t => updateExperience(exp.id, 'company', t)} />
                           </View>
-                          <View className="w-[48%]">
-                            <Text className="text-[10px] font-bold text-gray-500 mb-1">END DATE</Text>
-                            <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="MM/YYYY or Present" value={exp.endDate} onChangeText={t => updateExperience(exp.id, 'endDate', t)} />
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Position</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Senior Developer" placeholderTextColor="#9CA3AF" value={exp.jobTitle} onChangeText={t => updateExperience(exp.id, 'jobTitle', t)} />
                           </View>
                         </View>
+
+                        <View className="flex-row gap-4 items-end">
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Start Date</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Jan 2020" placeholderTextColor="#9CA3AF" value={exp.startDate} onChangeText={t => updateExperience(exp.id, 'startDate', t)} />
+                          </View>
+                          <View className="flex-1">
+                            <TouchableOpacity 
+                              onPress={() => updateExperience(exp.id, 'current', !exp.current)}
+                              className="flex-row items-center mb-2"
+                            >
+                              <View className={`w-4 h-4 border border-gray-300 rounded mr-2 items-center justify-center ${exp.current ? 'bg-blue-600 border-blue-600' : 'bg-white'}`}>
+                                {exp.current && <Ionicons name="checkmark" size={12} color="white" />}
+                              </View>
+                              <Text className="text-[10px] font-bold text-gray-500 uppercase">CURRENT</Text>
+                            </TouchableOpacity>
+
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">End Date</Text>
+                            <TextInput 
+                              className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" 
+                              placeholder="e.g. Present" 
+                              placeholderTextColor="#9CA3AF" 
+                              value={exp.current ? 'Present' : exp.endDate} 
+                              onChangeText={t => updateExperience(exp.id, 'endDate', t)} 
+                              editable={!exp.current} 
+                            />
+                          </View>
+                        </View>
+
                         <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1">DESCRIPTION</Text>
-                          <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900 min-h-[100px]" placeholder="Describe achievements..." value={exp.description} onChangeText={t => updateExperience(exp.id, 'description', t)} multiline textAlignVertical="top" />
+                          <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Location</Text>
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. New York, NY" placeholderTextColor="#9CA3AF" value={exp.location} onChangeText={t => updateExperience(exp.id, 'location', t)} />
+                        </View>
+
+                        <View>
+                          <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Description (comma separated points)</Text>
+                          <TextInput 
+                            className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium min-h-[100px]" 
+                            placeholder="Led a team of 5 developers..., Implemented CI/CD pipelines..." 
+                            placeholderTextColor="#9CA3AF"
+                            value={exp.description} 
+                            onChangeText={t => updateExperience(exp.id, 'description', t)} 
+                            multiline 
+                            textAlignVertical="top" 
+                          />
+                          <Text className="text-[9px] text-gray-400 mt-1 leading-normal">
+                            For best results in preview, separate bullet points with commas or write one continuous paragraph depending on template.
+                          </Text>
                         </View>
                       </View>
                     </View>
                   ))}
-                  <TouchableOpacity onPress={addExperience} className="flex-row items-center justify-center py-4 bg-blue-50 rounded-2xl border border-blue-100 border-dashed">
-                    <Ionicons name="add" size={20} color="#2563eb" /><Text className="text-blue-600 font-bold ml-2">Add Experience</Text>
-                  </TouchableOpacity>
+
+                  {experiences.length === 0 && (
+                    <TouchableOpacity onPress={addExperience} className="flex-row items-center justify-center py-8 bg-blue-50 rounded-2xl border border-blue-100 border-dashed mb-6">
+                      <Ionicons name="add" size={20} color="#2563eb" />
+                      <Text className="text-blue-600 font-bold ml-2">Add Experience Record</Text>
+                    </TouchableOpacity>
+                  )}
+
                   <View className="flex-row justify-between mt-8 gap-4">
                     <TouchableOpacity onPress={() => setActiveTab('PERSONAL')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
                       <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
@@ -1064,38 +1255,86 @@ export default function CreateCVScreen() {
               {/* TAB: EDUCATION */}
               {activeTab === 'EDUCATION' && (
                 <View className="pb-10">
-                  <Text className="text-3xl font-extrabold text-gray-900 mb-6">Education</Text>
+                  <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-3xl font-extrabold text-gray-900">Education</Text>
+                    <TouchableOpacity 
+                      onPress={addEducation} 
+                      className="flex-row items-center bg-blue-50 border border-blue-100 rounded-full px-4 py-2"
+                    >
+                      <Ionicons name="add" size={16} color="#2563eb" />
+                      <Text className="text-blue-600 font-bold text-xs ml-1">Add Education</Text>
+                    </TouchableOpacity>
+                  </View>
+
                   {educations.map((edu, index) => (
-                    <View key={edu.id} className="mb-6 bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                      <View className="flex-row justify-between items-center mb-4">
-                        <Text className="font-bold text-gray-700">Education {index + 1}</Text>
-                        <TouchableOpacity onPress={() => removeEducation(edu.id)} className="p-1"><Ionicons name="trash-outline" size={18} color="#ef4444" /></TouchableOpacity>
+                    <View key={edu.id} className="mb-6 bg-white border border-gray-150 rounded-3xl p-5" style={styles.previewShadow}>
+                      <View className="flex-row justify-between items-center mb-4 border-b border-gray-100 pb-2">
+                        <Text className="font-extrabold text-gray-800">Education {index + 1}</Text>
+                        <TouchableOpacity onPress={() => removeEducation(edu.id)} className="p-1">
+                          <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                        </TouchableOpacity>
                       </View>
+
                       <View className="space-y-4 gap-3">
                         <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1">DEGREE / CERTIFICATE</Text>
-                          <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="e.g. B.S. Computer Science" value={edu.degree} onChangeText={t => updateEducation(edu.id, 'degree', t)} />
+                          <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Institution</Text>
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Harvard University" placeholderTextColor="#9CA3AF" value={edu.school} onChangeText={t => updateEducation(edu.id, 'school', t)} />
                         </View>
+
+                        <View className="flex-row gap-4">
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Degree</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Bachelor of Science" placeholderTextColor="#9CA3AF" value={edu.degree} onChangeText={t => updateEducation(edu.id, 'degree', t)} />
+                          </View>
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Field of Study</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Computer Science" placeholderTextColor="#9CA3AF" value={edu.fieldOfStudy} onChangeText={t => updateEducation(edu.id, 'fieldOfStudy', t)} />
+                          </View>
+                        </View>
+
+                        <View className="flex-row gap-4 items-end">
+                          <View className="flex-1">
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Start Date</Text>
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Sep 2018" placeholderTextColor="#9CA3AF" value={edu.startDate} onChangeText={t => updateEducation(edu.id, 'startDate', t)} />
+                          </View>
+                          <View className="flex-1">
+                            <TouchableOpacity 
+                              onPress={() => updateEducation(edu.id, 'current', !edu.current)}
+                              className="flex-row items-center mb-2"
+                            >
+                              <View className={`w-4 h-4 border border-gray-300 rounded mr-2 items-center justify-center ${edu.current ? 'bg-blue-600 border-blue-600' : 'bg-white'}`}>
+                                {edu.current && <Ionicons name="checkmark" size={12} color="white" />}
+                              </View>
+                              <Text className="text-[10px] font-bold text-gray-500 uppercase">CURRENT</Text>
+                            </TouchableOpacity>
+
+                            <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">End Date</Text>
+                            <TextInput 
+                              className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" 
+                              placeholder="e.g. May 2022" 
+                              placeholderTextColor="#9CA3AF" 
+                              value={edu.current ? 'Present' : edu.endDate} 
+                              onChangeText={t => updateEducation(edu.id, 'endDate', t)} 
+                              editable={!edu.current}
+                            />
+                          </View>
+                        </View>
+
                         <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1">SCHOOL / UNIVERSITY</Text>
-                          <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="e.g. Stanford University" value={edu.school} onChangeText={t => updateEducation(edu.id, 'school', t)} />
-                        </View>
-                        <View className="flex-row justify-between">
-                          <View className="w-[48%]">
-                            <Text className="text-[10px] font-bold text-gray-500 mb-1">START DATE</Text>
-                            <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="YYYY" value={edu.startDate} onChangeText={t => updateEducation(edu.id, 'startDate', t)} />
-                          </View>
-                          <View className="w-[48%]">
-                            <Text className="text-[10px] font-bold text-gray-500 mb-1">END DATE</Text>
-                            <TextInput className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-3 text-gray-900" placeholder="YYYY" value={edu.endDate} onChangeText={t => updateEducation(edu.id, 'endDate', t)} />
-                          </View>
+                          <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Score / GPA (Optional)</Text>
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. 3.8/4.0" placeholderTextColor="#9CA3AF" value={edu.gpa} onChangeText={t => updateEducation(edu.id, 'gpa', t)} />
                         </View>
                       </View>
                     </View>
                   ))}
-                  <TouchableOpacity onPress={addEducation} className="flex-row items-center justify-center py-4 bg-blue-50 rounded-2xl border border-blue-100 border-dashed">
-                    <Ionicons name="add" size={20} color="#2563eb" /><Text className="text-blue-600 font-bold ml-2">Add Education</Text>
-                  </TouchableOpacity>
+
+                  {educations.length === 0 && (
+                    <TouchableOpacity onPress={addEducation} className="flex-row items-center justify-center py-8 bg-blue-50 rounded-2xl border border-blue-100 border-dashed mb-6">
+                      <Ionicons name="add" size={20} color="#2563eb" />
+                      <Text className="text-blue-600 font-bold ml-2">Add Education Record</Text>
+                    </TouchableOpacity>
+                  )}
+
                   <View className="flex-row justify-between mt-8 gap-4">
                     <TouchableOpacity onPress={() => setActiveTab('EXPERIENCE')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
                       <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
@@ -1112,8 +1351,21 @@ export default function CreateCVScreen() {
               {activeTab === 'SKILLS' && (
                 <View className="pb-10">
                   <Text className="text-3xl font-extrabold text-gray-900 mb-6">Skills</Text>
-                  {skills.length > 0 && (
-                    <View className="flex-row flex-wrap gap-2 mb-6">
+                  
+                  <View className="mb-6">
+                    <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide uppercase">Add a Skill</Text>
+                    <TextInput 
+                      className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" 
+                      placeholder="e.g. React.js (Press Enter to add)" 
+                      placeholderTextColor="#9CA3AF"
+                      value={newSkill} 
+                      onChangeText={setNewSkill} 
+                      onSubmitEditing={addSkill} 
+                    />
+                  </View>
+
+                  {skills.length > 0 ? (
+                    <View className="flex-row flex-wrap gap-2 mb-8">
                       {skills.map((skill, index) => (
                         <View key={index} className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-full flex-row items-center">
                           <Text className="text-blue-800 font-bold text-xs mr-2">{skill}</Text>
@@ -1121,11 +1373,10 @@ export default function CreateCVScreen() {
                         </View>
                       ))}
                     </View>
+                  ) : (
+                    <Text className="text-gray-400 italic text-sm mb-8">No skills added yet.</Text>
                   )}
-                  <View className="flex-row items-center space-x-3 gap-3">
-                    <TextInput className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="Add a skill (e.g. JavaScript)" value={newSkill} onChangeText={setNewSkill} onSubmitEditing={addSkill} />
-                    <TouchableOpacity onPress={addSkill} className="bg-[#2563EB] w-14 h-14 rounded-2xl items-center justify-center" style={styles.nextShadow}><Ionicons name="add" size={28} color="white" /></TouchableOpacity>
-                  </View>
+
                   <View className="flex-row justify-between mt-8 gap-4">
                     <TouchableOpacity onPress={() => setActiveTab('EDUCATION')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
                       <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
@@ -1143,8 +1394,18 @@ export default function CreateCVScreen() {
                 <View className="pb-10">
                   <Text className="text-3xl font-extrabold text-gray-900 mb-6">Professional Summary</Text>
                   <View className="mb-4">
-                    <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">SUMMARY</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium min-h-[160px]" placeholder="Write a short summary highlighting achievements..." placeholderTextColor="#9CA3AF" value={summary} onChangeText={setSummary} multiline textAlignVertical="top" />
+                    <Text className="text-xs font-extrabold text-gray-500 mb-3 tracking-wide uppercase">
+                      Write a short summary about your professional background and goals.
+                    </Text>
+                    <TextInput 
+                      className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium min-h-[160px]" 
+                      placeholder="Experienced software engineer with a passion for building scalable web applications..." 
+                      placeholderTextColor="#9CA3AF"
+                      value={summary} 
+                      onChangeText={setSummary} 
+                      multiline 
+                      textAlignVertical="top" 
+                    />
                   </View>
                   <View className="flex-row justify-between mt-8 gap-4">
                     <TouchableOpacity onPress={() => setActiveTab('SKILLS')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">

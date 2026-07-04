@@ -19,10 +19,11 @@ const TEMPLATES = [
     id: 'classic',
     name: 'Classic Corporate',
     description: 'Clean structured design with navy headers. Best for traditional corporate and business fields.',
-    color: '#2563EB',
+    color: '#1E3A8A',
     mockName: 'ALEX MORGAN',
     mockRole: 'SENIOR SOFTWARE ENGINEER',
     category: 'Classic',
+    atsApproved: true,
   },
   {
     id: 'modern',
@@ -32,6 +33,7 @@ const TEMPLATES = [
     mockName: 'SOPHIA CHEN',
     mockRole: 'PRODUCT DESIGNER',
     category: 'Minimalist',
+    atsApproved: true,
   },
   {
     id: 'creative',
@@ -41,6 +43,77 @@ const TEMPLATES = [
     mockName: 'LIAM JOHNSON',
     mockRole: 'MARKETING DIRECTOR',
     category: 'Creative',
+    atsApproved: false,
+  },
+  {
+    id: 'banner',
+    name: 'Elegant Banner',
+    description: 'Features a solid dark header banner containing a circular photo, with contact details aligned horizontally.',
+    color: '#1F2937',
+    mockName: 'VICTORIA CHANDLER',
+    mockRole: 'ACCOUNT EXECUTIVE',
+    category: 'Modern',
+    atsApproved: false,
+  },
+  {
+    id: 'timeline',
+    name: 'Modern Timeline',
+    description: 'Timeline-style left accent stripe running down the body. Clean timeline bullet points start each section.',
+    color: '#10B981',
+    mockName: 'ETHAN HUNT',
+    mockRole: 'OPERATIONS SPECIALIST',
+    category: 'Modern',
+    atsApproved: true,
+  },
+  {
+    id: 'executive',
+    name: 'Executive Premium',
+    description: 'A prestigious template with a gold-bordered profile photo and navy header banner, designed for leadership roles.',
+    color: '#7E22CE',
+    mockName: 'CLARA OSWALD',
+    mockRole: 'CHIEF STRATEGY OFFICER',
+    category: 'Classic',
+    atsApproved: false,
+  },
+  {
+    id: 'compact',
+    name: 'Clean Compact',
+    description: 'Tight single-column layout with compact spacing, perfect for fits-on-one-page resume demands.',
+    color: '#0D9488',
+    mockName: 'JAMES BOND',
+    mockRole: 'SECURITY ANALYST',
+    category: 'Minimalist',
+    atsApproved: true,
+  },
+  {
+    id: 'vibrant',
+    name: 'Vibrant Crimson',
+    description: 'Bold crimson borders and a prominent circular avatar header, for candidates wanting to stand out.',
+    color: '#DC2626',
+    mockName: 'SCARLETT JOHANSSON',
+    mockRole: 'PUBLIC RELATIONS MANAGER',
+    category: 'Creative',
+    atsApproved: false,
+  },
+  {
+    id: 'tech',
+    name: 'Developer Terminal',
+    description: 'Code-style monospace elements with a sleek modern green left accent stripe. Designed for programmers.',
+    color: '#059669',
+    mockName: 'LINUS TORVALDS',
+    mockRole: 'KERNEL DEVELOPER',
+    category: 'Modern',
+    atsApproved: true,
+  },
+  {
+    id: 'split',
+    name: 'Modern Split',
+    description: 'A clean 40/60 vertical split panel. The left side carries profile details and skills, while the right displays history.',
+    color: '#4B5563',
+    mockName: 'MARCUS AURELIUS',
+    mockRole: 'MANAGEMENT CONSULTANT',
+    category: 'Creative',
+    atsApproved: false,
   },
 ] as const;
 
@@ -50,7 +123,7 @@ export default function SelectTemplateScreen() {
 
   const filteredTemplates = TEMPLATES.filter((tmpl) => {
     if (activeCategory === 'All Styles') return true;
-    if (activeCategory === 'Modern') return tmpl.id === 'modern'; // Match Modern category to Minimalist
+    if (activeCategory === 'Modern') return tmpl.category === 'Modern';
     return tmpl.category === activeCategory;
   });
 
@@ -123,9 +196,14 @@ export default function SelectTemplateScreen() {
               <View 
                 className="bg-white border border-gray-200 rounded-2xl p-4 mb-4 relative min-h-[140px] justify-center overflow-hidden"
               >
-                {/* ATS Approved Badge */}
-                <View className="absolute top-2 left-2 bg-[#1E293B] rounded-full px-2 py-0.5 z-10">
-                  <Text className="text-white text-[8px] font-bold uppercase tracking-wider">ATS APPROVED</Text>
+                {/* ATS Approved / Photo Layout Badge */}
+                <View 
+                  className="absolute top-2 left-2 rounded-full px-2.5 py-0.5 z-10"
+                  style={{ backgroundColor: tmpl.atsApproved ? '#1E293B' : '#3B82F6' }}
+                >
+                  <Text className="text-white text-[8px] font-bold uppercase tracking-wider">
+                    {tmpl.atsApproved ? 'ATS APPROVED' : 'PHOTO LAYOUT'}
+                  </Text>
                 </View>
 
                 {/* Mock Header Content */}

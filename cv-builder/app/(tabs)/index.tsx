@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../config/firebaseConfig';
+import { auth, db } from '../../config/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,8 +15,23 @@ export default function HomeScreen() {
     const fetchUserData = async () => {
       const user = auth.currentUser;
       if (!user) return;
+      
+      // 1. Set initial quick fallback from authentication details
       setUserName(user.displayName || user.email?.split('@')[0] || 'User');
       
+      // 2. Fetch official full name from Firestore document
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data()?.fullName) {
+          setUserName(userDoc.data().fullName);
+          return;
+        }
+      } catch (e) {
+        console.warn('Failed to fetch user document from Firestore:', e);
+      }
+
+      // 3. Fallback: Reload authentication profile
       try {
         await user.reload();
         const updatedUser = auth.currentUser;

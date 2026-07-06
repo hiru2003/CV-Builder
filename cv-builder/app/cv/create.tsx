@@ -10,8 +10,14 @@ import * as ImagePicker from 'expo-image-picker';
 type PersonalInfo = { fullName: string; jobTitle: string; email: string; phone: string; address: string; linkedin: string; github: string; };
 type Experience = { id: string; jobTitle: string; company: string; startDate: string; endDate: string; description: string; location: string; current: boolean; };
 type Education = { id: string; degree: string; school: string; startDate: string; endDate: string; fieldOfStudy: string; current: boolean; gpa: string; };
+type Language = { id: string; name: string; level: string; };
+type Certification = { id: string; name: string; issuer: string; date: string; };
+type Award = { id: string; title: string; issuer: string; date: string; description: string; };
+type SocialLink = { id: string; label: string; url: string; };
+type Reference = { id: string; name: string; relationship: string; company: string; email: string; phone: string; };
+type CustomSectionItem = { id: string; title: string; subtitle: string; description: string; };
 
-const TABS = ['PERSONAL', 'EXPERIENCE', 'EDUCATION', 'SKILLS', 'SUMMARY'] as const;
+const TABS = ['PERSONAL', 'EXPERIENCE', 'EDUCATION', 'SKILLS', 'SUMMARY', 'ADD', 'LAYOUT'] as const;
 type TabType = typeof TABS[number];
 
 const ATS_TEMPLATES = ['classic', 'modern', 'timeline', 'compact', 'tech'];
@@ -33,6 +39,37 @@ export default function CreateCVScreen() {
   const [educations, setEducations] = useState<Education[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
+
+  // --- Additional Sections State ---
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [websites, setWebsites] = useState<SocialLink[]>([]);
+  const [references, setReferences] = useState<Reference[]>([]);
+  const [hobbies, setHobbies] = useState<string[]>([]);
+  const [newHobby, setNewHobby] = useState('');
+  const [customSectionTitle, setCustomSectionTitle] = useState('Custom Section');
+  const [customSectionItems, setCustomSectionItems] = useState<CustomSectionItem[]>([]);
+
+  // --- Active Section Toggles ---
+  const [showLanguages, setShowLanguages] = useState(false);
+  const [showCertifications, setShowCertifications] = useState(false);
+  const [showAwards, setShowAwards] = useState(false);
+  const [showWebsites, setShowWebsites] = useState(false);
+  const [showReferences, setShowReferences] = useState(false);
+  const [showHobbies, setShowHobbies] = useState(false);
+  const [showCustomSection, setShowCustomSection] = useState(false);
+
+  // --- Expanded Accordion Cards in ADD tab ---
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  // --- Layout Configuration State ---
+  const [accentColor, setAccentColor] = useState('#00A3FF');
+  const [customColorText, setCustomColorText] = useState('#00A3FF');
+  const [showCustomColorInput, setShowCustomColorInput] = useState(false);
+  const [marginSize, setMarginSize] = useState<'compact' | 'normal' | 'loose'>('normal');
+  const [typographySize, setTypographySize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [documentFont, setDocumentFont] = useState('Inter');
 
   // --- Handlers for Photo Picker ---
   const pickImage = async () => {
@@ -119,8 +156,367 @@ export default function CreateCVScreen() {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
+  // --- Handlers for Languages ---
+  const addLanguage = () => {
+    setLanguages([...languages, { id: Date.now().toString(), name: '', level: '' }]);
+  };
+  const updateLanguage = (id: string, field: keyof Language, value: string) => {
+    setLanguages(languages.map(lang => lang.id === id ? { ...lang, [field]: value } : lang));
+  };
+  const removeLanguage = (id: string) => {
+    setLanguages(languages.filter(lang => lang.id !== id));
+  };
+
+  // --- Handlers for Certifications ---
+  const addCertification = () => {
+    setCertifications([...certifications, { id: Date.now().toString(), name: '', issuer: '', date: '' }]);
+  };
+  const updateCertification = (id: string, field: keyof Certification, value: string) => {
+    setCertifications(certifications.map(cert => cert.id === id ? { ...cert, [field]: value } : cert));
+  };
+  const removeCertification = (id: string) => {
+    setCertifications(certifications.filter(cert => cert.id !== id));
+  };
+
+  // --- Handlers for Awards ---
+  const addAward = () => {
+    setAwards([...awards, { id: Date.now().toString(), title: '', issuer: '', date: '', description: '' }]);
+  };
+  const updateAward = (id: string, field: keyof Award, value: string) => {
+    setAwards(awards.map(aw => aw.id === id ? { ...aw, [field]: value } : aw));
+  };
+  const removeAward = (id: string) => {
+    setAwards(awards.filter(aw => aw.id !== id));
+  };
+
+  // --- Handlers for Websites ---
+  const addWebsite = () => {
+    setWebsites([...websites, { id: Date.now().toString(), label: '', url: '' }]);
+  };
+  const updateWebsite = (id: string, field: keyof SocialLink, value: string) => {
+    setWebsites(websites.map(web => web.id === id ? { ...web, [field]: value } : web));
+  };
+  const removeWebsite = (id: string) => {
+    setWebsites(websites.filter(web => web.id !== id));
+  };
+
+  // --- Handlers for References ---
+  const addReference = () => {
+    setReferences([...references, { id: Date.now().toString(), name: '', relationship: '', company: '', email: '', phone: '' }]);
+  };
+  const updateReference = (id: string, field: keyof Reference, value: string) => {
+    setReferences(references.map(ref => ref.id === id ? { ...ref, [field]: value } : ref));
+  };
+  const removeReference = (id: string) => {
+    setReferences(references.filter(ref => ref.id !== id));
+  };
+
+  // --- Handlers for Hobbies ---
+  const addHobby = () => {
+    if (newHobby.trim()) {
+      setHobbies([...hobbies, newHobby.trim()]);
+      setNewHobby('');
+    }
+  };
+  const removeHobby = (index: number) => {
+    setHobbies(hobbies.filter((_, i) => i !== index));
+  };
+
+  // --- Handlers for Custom Section ---
+  const addCustomSectionItem = () => {
+    setCustomSectionItems([...customSectionItems, { id: Date.now().toString(), title: '', subtitle: '', description: '' }]);
+  };
+  const updateCustomSectionItem = (id: string, field: keyof CustomSectionItem, value: string) => {
+    setCustomSectionItems(customSectionItems.map(item => item.id === id ? { ...item, [field]: value } : item));
+  };
+  const removeCustomSectionItem = (id: string) => {
+    setCustomSectionItems(customSectionItems.filter(item => item.id !== id));
+  };
+
   // --- HTML Template Generation (Supports 10 Visually Distinct Formats) ---
   const generateHTML = () => {
+    // --- Layout and Styling Configuration Helpers ---
+    const hexToRgba = (hex: string, alpha: number) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    const margins = marginSize === 'compact' ? '0.4in' : (marginSize === 'loose' ? '0.8in' : '0.6in');
+    const baseSize = typographySize === 'small' ? 11.5 : (typographySize === 'large' ? 14.5 : 13);
+    const sizeFactor = baseSize / 13;
+    const fontStack = documentFont === 'Playfair' ? "'Playfair Display', serif" :
+                      documentFont === 'Merriweather' ? "'Merriweather', serif" :
+                      documentFont === 'Lora' ? "'Lora', serif" :
+                      documentFont === 'Times' ? "'Times New Roman', Times, serif" :
+                      documentFont === 'Fira Code' ? "'Fira Code', monospace" :
+                      documentFont === 'Outfit' ? "'Outfit', sans-serif" :
+                      documentFont === 'Montserrat' ? "'Montserrat', sans-serif" :
+                      documentFont === 'Roboto' ? "'Roboto', sans-serif" :
+                      "'Inter', sans-serif";
+
+    const googleFontsLink = `
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    `;
+
+    // --- Global Custom Styles Overrides ---
+    const globalStylesOverride = `
+      ${googleFontsLink}
+      <style>
+        * {
+          font-family: ${fontStack} !important;
+        }
+        body {
+          margin: ${margins} !important;
+          font-size: ${baseSize}px !important;
+          line-height: 1.5;
+        }
+        .name {
+          font-size: ${28 * sizeFactor}px !important;
+          color: ${accentColor} !important;
+        }
+        .title {
+          color: ${accentColor} !important;
+          font-size: ${14 * sizeFactor}px !important;
+        }
+        .section-title {
+          color: ${accentColor} !important;
+          border-bottom-color: ${hexToRgba(accentColor, 0.2)} !important;
+          font-size: ${13 * sizeFactor}px !important;
+        }
+        .skill-tag {
+          background-color: ${hexToRgba(accentColor, 0.08)} !important;
+          color: ${accentColor} !important;
+          border-color: ${hexToRgba(accentColor, 0.2)} !important;
+        }
+        /* Layout overrides */
+        .exec-header {
+          background: linear-gradient(135deg, ${accentColor}, ${hexToRgba(accentColor, 0.85)}) !important;
+          border-bottom-color: ${accentColor} !important;
+        }
+        .timeline-container {
+          border-left-color: ${accentColor} !important;
+        }
+        .section-title::before {
+          background-color: ${accentColor} !important;
+        }
+        .sidebar-title {
+          border-bottom-color: ${accentColor} !important;
+          color: ${accentColor} !important;
+        }
+        .item-sub {
+          color: ${accentColor} !important;
+        }
+        a {
+          color: ${accentColor} !important;
+        }
+        .item-title {
+          font-size: ${13 * sizeFactor}px !important;
+        }
+        .item-date {
+          font-size: ${11 * sizeFactor}px !important;
+        }
+        .item-desc {
+          font-size: ${11 * sizeFactor}px !important;
+        }
+        .summary-text {
+          font-size: ${12 * sizeFactor}px !important;
+        }
+      </style>
+    `;
+
+    // --- Additional Sections HTML Builders ---
+    const renderLanguagesHTML = (isSidebar = false) => {
+      if (!showLanguages || languages.length === 0) return '';
+      if (isSidebar) {
+        return `
+          <div class="sidebar-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; color: ${accentColor};">Languages</div>
+          <div style="margin-top: 8px;">
+            ${languages.map(l => `
+              <div style="margin-bottom: 6px; font-size: 11px; color: #d1d5db;">
+                <span style="font-weight: bold; color: white;">${l.name || 'Language'}</span>
+                ${l.level ? `<br/><span style="color: #9ca3af; font-size: 10px;">${l.level}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
+        <div class="section">
+          <div class="section-title">Languages</div>
+          <div class="skills-container" style="display: flex; flex-wrap: wrap; gap: 6px;">
+            ${languages.map(l => `
+              <span class="skill-tag" style="background-color: ${hexToRgba(accentColor, 0.08)}; color: ${accentColor}; padding: 3px 8px; border: 1px solid ${hexToRgba(accentColor, 0.2)}; border-radius: 8px; font-size: 10.5px; display: inline-block; margin: 2px;">
+                <strong>${l.name || 'Language'}</strong>${l.level ? `: ${l.level}` : ''}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    };
+
+    const renderCertificationsHTML = (isSidebar = false) => {
+      if (!showCertifications || certifications.length === 0) return '';
+      if (isSidebar) {
+        return `
+          <div class="sidebar-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; color: ${accentColor};">Certifications</div>
+          <div style="margin-top: 8px;">
+            ${certifications.map(c => `
+              <div style="margin-bottom: 8px; font-size: 10.5px; color: #d1d5db;">
+                <span style="font-weight: bold; color: white;">${c.name || 'Certificate'}</span>
+                ${c.issuer ? `<br/><span style="color: #9ca3af; font-style: italic;">${c.issuer}</span>` : ''}
+                ${c.date ? ` • <span style="color: #9ca3af;">${c.date}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
+        <div class="section">
+          <div class="section-title">Certifications & Licenses</div>
+          ${certifications.map(c => `
+            <div class="item" style="margin-bottom: 10px;">
+              <div class="item-header" style="display: flex; justify-content: space-between; font-weight: bold; font-size: ${12.5 * sizeFactor}px; color: #111827;">
+                <span class="item-title">${c.name || 'Certificate'}</span>
+                <span class="item-date" style="font-size: ${11 * sizeFactor}px; color: #6b7280; font-weight: normal;">${c.date || ''}</span>
+              </div>
+              ${c.issuer ? `<div class="item-sub" style="font-size: ${11.5 * sizeFactor}px; font-style: italic; color: #4b5563; margin-top: 2px;">${c.issuer}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    };
+
+    const renderAwardsHTML = () => {
+      if (!showAwards || awards.length === 0) return '';
+      return `
+        <div class="section">
+          <div class="section-title">Awards & Honors</div>
+          ${awards.map(a => `
+            <div class="item" style="margin-bottom: 10px;">
+              <div class="item-header" style="display: flex; justify-content: space-between; font-weight: bold; font-size: ${12.5 * sizeFactor}px; color: #111827;">
+                <span class="item-title">${a.title || 'Award'}</span>
+                <span class="item-date" style="font-size: ${11 * sizeFactor}px; color: #6b7280; font-weight: normal;">${a.date || ''}</span>
+              </div>
+              <div class="item-sub" style="font-size: ${11.5 * sizeFactor}px; font-style: italic; color: ${accentColor}; margin-top: 2px;">${a.issuer || ''}</div>
+              ${a.description ? `<div class="item-desc" style="font-size: ${11 * sizeFactor}px; color: #4b5563; margin-top: 3px;">${a.description}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    };
+
+    const renderWebsitesHTML = (isSidebar = false) => {
+      if (!showWebsites || websites.length === 0) return '';
+      if (isSidebar) {
+        return `
+          <div class="sidebar-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; color: ${accentColor};">Links</div>
+          <div style="margin-top: 8px;">
+            ${websites.map(w => `
+              <div style="margin-bottom: 6px; font-size: 11px; color: #d1d5db; word-wrap: break-word;">
+                <span style="font-weight: bold; color: white;">${w.label || 'Link'}</span><br/>
+                <a href="${w.url.startsWith('http') ? w.url : 'https://' + w.url}" style="color: ${accentColor}; text-decoration: none;">${w.url}</a>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
+        <div class="section">
+          <div class="section-title">Websites & Links</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            ${websites.map(w => `
+              <div style="font-size: ${11.5 * sizeFactor}px;">
+                <strong style="color: #111827;">${w.label || 'Link'}:</strong>
+                <a href="${w.url.startsWith('http') ? w.url : 'https://' + w.url}" style="color: ${accentColor}; text-decoration: none; margin-left: 4px;">${w.url}</a>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    };
+
+    const renderReferencesHTML = () => {
+      if (!showReferences || references.length === 0) return '';
+      return `
+        <div class="section">
+          <div class="section-title">References</div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            ${references.map(r => `
+              <div style="font-size: ${11.5 * sizeFactor}px; color: #4b5563; margin-bottom: 8px;">
+                <strong style="font-size: ${12 * sizeFactor}px; color: #111827; display: block; margin-bottom: 2px;">${r.name || 'Reference'}</strong>
+                ${r.relationship ? `<span>${r.relationship}</span>` : ''}
+                ${r.company ? ` • <span>${r.company}</span>` : ''}
+                ${r.email ? `<br/><span style="font-size: ${10.5 * sizeFactor}px; color: #6b7280;">Email: ${r.email}</span>` : ''}
+                ${r.phone ? `<br/><span style="font-size: ${10.5 * sizeFactor}px; color: #6b7280;">Phone: ${r.phone}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    };
+
+    const renderHobbiesHTML = (isSidebar = false) => {
+      if (!showHobbies || hobbies.length === 0) return '';
+      if (isSidebar) {
+        return `
+          <div class="sidebar-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; color: ${accentColor};">Hobbies & Interests</div>
+          <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">
+            ${hobbies.map(h => `
+              <span style="background-color: rgba(255,255,255,0.1); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; display: inline-block; margin: 1px;">${h}</span>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
+        <div class="section">
+          <div class="section-title">Hobbies & Interests</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            ${hobbies.map(h => `
+              <span class="skill-tag" style="background-color: ${hexToRgba(accentColor, 0.08)}; color: ${accentColor}; padding: 3px 8px; border: 1px solid ${hexToRgba(accentColor, 0.2)}; border-radius: 8px; font-size: 10.5px; display: inline-block; margin: 2px;">
+                <strong>${h}</strong>
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    };
+
+    const renderCustomSectionHTML = (isSidebar = false) => {
+      if (!showCustomSection || customSectionItems.length === 0) return '';
+      if (isSidebar) {
+        return `
+          <div class="sidebar-title" style="font-size: 11px; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid ${accentColor}; padding-bottom: 4px; margin-bottom: 12px; margin-top: 25px; color: ${accentColor};">${customSectionTitle}</div>
+          <div style="margin-top: 8px;">
+            ${customSectionItems.map(item => `
+              <div style="margin-bottom: 8px; font-size: 10.5px; color: #d1d5db;">
+                <span style="font-weight: bold; color: white;">${item.title || 'Item Title'}</span>
+                ${item.subtitle ? `<br/><span style="color: #9ca3af; font-size: 9.5px;">${item.subtitle}</span>` : ''}
+                ${item.description ? `<br/><span style="color: #d1d5db; font-size: 9.5px;">${item.description}</span>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      return `
+        <div class="section">
+          <div class="section-title">${customSectionTitle}</div>
+          ${customSectionItems.map(item => `
+            <div class="item" style="margin-bottom: 10px;">
+              <div class="item-header" style="display: flex; justify-content: space-between; font-weight: bold; font-size: ${12.5 * sizeFactor}px; color: #111827;">
+                <span class="item-title">${item.title || 'Item Title'}</span>
+                <span class="item-date" style="font-size: ${11 * sizeFactor}px; color: #6b7280; font-weight: normal;">${item.subtitle || ''}</span>
+              </div>
+              ${item.description ? `<div class="item-desc" style="font-size: ${11 * sizeFactor}px; color: #4b5563; margin-top: 3px;">${item.description.replace(/\n/g, '<br/>')}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    };
+
     const experiencesHTML = experiences.map(exp => `
       <div class="item">
         <div class="item-header">
@@ -178,6 +574,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 6px; }
             .skill-tag { background-color: #eff6ff; color: #1e40af; padding: 3px 8px; border: 1px solid #dbeafe; border-radius: 8px; font-size: 10.5px; display: inline-block; margin: 2px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -195,6 +592,13 @@ export default function CreateCVScreen() {
           ${experiences.length > 0 ? `<div class="section"><div class="section-title">Work Experience</div>${experiencesHTML}</div>` : ''}
           ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
           ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+          ${renderLanguagesHTML(false)}
+          ${renderCertificationsHTML(false)}
+          ${renderAwardsHTML()}
+          ${renderWebsitesHTML(false)}
+          ${renderReferencesHTML()}
+          ${renderHobbiesHTML(false)}
+          ${renderCustomSectionHTML(false)}
         </body>
         </html>
       `;
@@ -225,6 +629,7 @@ export default function CreateCVScreen() {
             .skills-container { text-align: center; }
             .skill-tag { border: 1px solid #e5e7eb; padding: 3px 8px; border-radius: 4px; font-size: 11px; display: inline-block; margin: 3px; color: #374151; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -242,6 +647,13 @@ export default function CreateCVScreen() {
           ${experiences.length > 0 ? `<div class="section"><div class="section-title">Work Experience</div>${experiencesHTML}</div>` : ''}
           ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
           ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+          ${renderLanguagesHTML(false)}
+          ${renderCertificationsHTML(false)}
+          ${renderAwardsHTML()}
+          ${renderWebsitesHTML(false)}
+          ${renderReferencesHTML()}
+          ${renderHobbiesHTML(false)}
+          ${renderCustomSectionHTML(false)}
         </body>
         </html>
       `;
@@ -274,6 +686,7 @@ export default function CreateCVScreen() {
             .item-sub { font-size: 11.5px; font-style: italic; color: #d97706; margin-bottom: 4px; }
             .skill-tag { background-color: #111827; color: #ffffff; padding: 4px 8px; border-radius: 6px; font-size: 10px; display: inline-block; margin: 3px 2px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="wrapper">
@@ -288,11 +701,18 @@ export default function CreateCVScreen() {
               ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-label">LinkedIn</span>${personalInfo.linkedin}</div>` : ''}
               ${personalInfo.github ? `<div class="contact-item"><span class="contact-label">GitHub</span>${personalInfo.github}</div>` : ''}
               ${skills.length > 0 ? `<div class="sidebar-title">Skills</div><div style="margin-top: 8px;">${skillsHTML}</div>` : ''}
+              ${renderLanguagesHTML(true)}
+              ${renderWebsitesHTML(true)}
+              ${renderHobbiesHTML(true)}
             </div>
             <div class="main-content">
               ${summary ? `<div class="section"><div class="section-title">Profile Summary</div><div class="summary-text">${summary}</div></div>` : ''}
               ${experiences.length > 0 ? `<div class="section"><div class="section-title">Work Experience</div>${experiencesHTML}</div>` : ''}
               ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
+              ${renderCertificationsHTML(false)}
+              ${renderAwardsHTML()}
+              ${renderReferencesHTML()}
+              ${renderCustomSectionHTML(false)}
             </div>
           </div>
         </body>
@@ -326,6 +746,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 6px; }
             .skill-tag { background-color: #f3f4f6; color: #1f2937; padding: 4px 10px; border-radius: 8px; font-size: 11px; border: 1px solid #e5e7eb; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="banner-header">
@@ -347,6 +768,13 @@ export default function CreateCVScreen() {
             ${experiences.length > 0 ? `<div class="section"><div class="section-title">Work Experience</div>${experiencesHTML}</div>` : ''}
             ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
             ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+            ${renderLanguagesHTML(false)}
+            ${renderCertificationsHTML(false)}
+            ${renderAwardsHTML()}
+            ${renderWebsitesHTML(false)}
+            ${renderReferencesHTML()}
+            ${renderHobbiesHTML(false)}
+            ${renderCustomSectionHTML(false)}
           </div>
         </body>
         </html>
@@ -378,6 +806,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 6px; }
             .skill-tag { background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 6px; font-size: 10.5px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -396,6 +825,13 @@ export default function CreateCVScreen() {
             ${experiences.length > 0 ? `<div class="section"><div class="section-title">Experience</div>${experiencesHTML}</div>` : ''}
             ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
             ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+            ${renderLanguagesHTML(false)}
+            ${renderCertificationsHTML(false)}
+            ${renderAwardsHTML()}
+            ${renderWebsitesHTML(false)}
+            ${renderReferencesHTML()}
+            ${renderHobbiesHTML(false)}
+            ${renderCustomSectionHTML(false)}
           </div>
         </body>
         </html>
@@ -429,6 +865,7 @@ export default function CreateCVScreen() {
             .item-sub { font-size: 11.5px; font-style: italic; color: #d97706; margin-bottom: 4px; }
             .skill-tag { background-color: #1e1b4b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; display: inline-block; margin: 3px 2px; font-family: sans-serif; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="exec-header">
@@ -449,10 +886,17 @@ export default function CreateCVScreen() {
             <div class="main-col">
               ${summary ? `<div class="section"><div class="section-title">Executive Summary</div><div class="summary-text">${summary}</div></div>` : ''}
               ${experiences.length > 0 ? `<div class="section"><div class="section-title">Professional Experience</div>${experiencesHTML}</div>` : ''}
+              ${renderAwardsHTML()}
+              ${renderReferencesHTML()}
+              ${renderCustomSectionHTML(false)}
             </div>
             <div class="side-col">
               ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
               ${skills.length > 0 ? `<div class="section"><div class="section-title">Core Skills</div><div style="margin-top: 8px;">${skillsHTML}</div></div>` : ''}
+              ${renderLanguagesHTML(true)}
+              ${renderWebsitesHTML(true)}
+              ${renderCertificationsHTML(true)}
+              ${renderHobbiesHTML(true)}
             </div>
           </div>
         </body>
@@ -483,6 +927,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 4px; }
             .skill-tag { background-color: #f0fdf4; color: #115e59; padding: 2px 6px; border: 1px solid #ccfbf1; border-radius: 4px; font-size: 9.5px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -502,6 +947,13 @@ export default function CreateCVScreen() {
           ${experiences.length > 0 ? `<div class="section"><div class="section-title">Experience</div>${experiencesHTML}</div>` : ''}
           ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
           ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+          ${renderLanguagesHTML(false)}
+          ${renderCertificationsHTML(false)}
+          ${renderAwardsHTML()}
+          ${renderWebsitesHTML(false)}
+          ${renderReferencesHTML()}
+          ${renderHobbiesHTML(false)}
+          ${renderCustomSectionHTML(false)}
         </body>
         </html>
       `;
@@ -531,6 +983,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 6px; }
             .skill-tag { background-color: #fef2f2; color: #991b1b; padding: 3px 8px; border: 1px solid #fee2e2; border-radius: 6px; font-size: 10.5px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -549,6 +1002,13 @@ export default function CreateCVScreen() {
           ${experiences.length > 0 ? `<div class="section"><div class="section-title">Work Experience</div>${experiencesHTML}</div>` : ''}
           ${educations.length > 0 ? `<div class="section"><div class="section-title">Education</div>${educationsHTML}</div>` : ''}
           ${skills.length > 0 ? `<div class="section"><div class="section-title">Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+          ${renderLanguagesHTML(false)}
+          ${renderCertificationsHTML(false)}
+          ${renderAwardsHTML()}
+          ${renderWebsitesHTML(false)}
+          ${renderReferencesHTML()}
+          ${renderHobbiesHTML(false)}
+          ${renderCustomSectionHTML(false)}
         </body>
         </html>
       `;
@@ -577,6 +1037,7 @@ export default function CreateCVScreen() {
             .skills-container { display: flex; flex-wrap: wrap; gap: 6px; }
             .skill-tag { background-color: #111827; color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
           </style>
+          ${globalStylesOverride}
         </head>
         <body>
           <div class="header">
@@ -594,6 +1055,13 @@ export default function CreateCVScreen() {
           ${experiences.length > 0 ? `<div class="section"><div class="section-title">> Work Experience</div>${experiencesHTML}</div>` : ''}
           ${educations.length > 0 ? `<div class="section"><div class="section-title">> Education</div>${educationsHTML}</div>` : ''}
           ${skills.length > 0 ? `<div class="section"><div class="section-title">> Skills</div><div class="skills-container">${skillsHTML}</div></div>` : ''}
+          ${renderLanguagesHTML(false)}
+          ${renderCertificationsHTML(false)}
+          ${renderAwardsHTML()}
+          ${renderWebsitesHTML(false)}
+          ${renderReferencesHTML()}
+          ${renderHobbiesHTML(false)}
+          ${renderCustomSectionHTML(false)}
         </body>
         </html>
       `;
@@ -625,6 +1093,7 @@ export default function CreateCVScreen() {
           .item-sub { font-size: 11.5px; font-style: italic; color: #4b5563; margin-bottom: 4px; }
           .skill-tag { background-color: #4b5563; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; display: inline-block; margin: 3px 2px; }
         </style>
+        ${globalStylesOverride}
       </head>
       <body>
         <div class="wrapper">
@@ -639,11 +1108,18 @@ export default function CreateCVScreen() {
             ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-label">LinkedIn</span>${personalInfo.linkedin}</div>` : ''}
             ${personalInfo.github ? `<div class="contact-item"><span class="contact-label">GitHub</span>${personalInfo.github}</div>` : ''}
             ${skills.length > 0 ? `<div class="split-title">Skills</div><div style="margin-top: 8px;">${skillsHTML}</div>` : ''}
+            ${renderLanguagesHTML(true)}
+            ${renderWebsitesHTML(true)}
+            ${renderHobbiesHTML(true)}
           </div>
           <div class="split-right">
             ${summary ? `<div class="section"><div class="split-title-dark">Profile Summary</div><div class="summary-text">${summary}</div></div>` : ''}
             ${experiences.length > 0 ? `<div class="section"><div class="split-title-dark">Work Experience</div>${experiencesHTML}</div>` : ''}
             ${educations.length > 0 ? `<div class="section"><div class="split-title-dark">Education</div>${educationsHTML}</div>` : ''}
+            ${renderCertificationsHTML(false)}
+            ${renderAwardsHTML()}
+            ${renderReferencesHTML()}
+            ${renderCustomSectionHTML(false)}
           </div>
         </div>
       </body>
@@ -669,14 +1145,32 @@ export default function CreateCVScreen() {
       <Image source={{ uri: photoInfo.uri }} style={styles.previewPhoto} />
     ) : null;
 
+    const getFontFamily = () => {
+      if (documentFont === 'Playfair' || documentFont === 'Merriweather' || documentFont === 'Lora' || documentFont === 'Times') {
+        return Platform.OS === 'ios' ? 'Georgia' : 'serif';
+      }
+      if (documentFont === 'Fira Code') {
+        return Platform.OS === 'ios' ? 'Courier' : 'monospace';
+      }
+      return Platform.OS === 'ios' ? 'System' : 'sans-serif';
+    };
+    const previewFont = getFontFamily();
+
+    const hexToRgba = (hex: string, alpha: number) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
     // Helper: Contact Row Details
     const renderContactDetails = () => (
       <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
-        {personalInfo.email && <Text className="text-[10px] text-gray-500">{personalInfo.email}</Text>}
-        {personalInfo.phone && <Text className="text-[10px] text-gray-500">• {personalInfo.phone}</Text>}
-        {personalInfo.address && <Text className="text-[10px] text-gray-500">• {personalInfo.address}</Text>}
-        {personalInfo.linkedin && <Text className="text-[10px] text-gray-500">• {personalInfo.linkedin}</Text>}
-        {personalInfo.github && <Text className="text-[10px] text-gray-500">• {personalInfo.github}</Text>}
+        {personalInfo.email && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>{personalInfo.email}</Text>}
+        {personalInfo.phone && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.phone}</Text>}
+        {personalInfo.address && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.address}</Text>}
+        {personalInfo.linkedin && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.linkedin}</Text>}
+        {personalInfo.github && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.github}</Text>}
       </View>
     );
 
@@ -685,17 +1179,17 @@ export default function CreateCVScreen() {
       if (experiences.length === 0) return null;
       return (
         <View className="mb-5">
-          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Work Experience</Text>
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color, fontFamily: previewFont }}>Work Experience</Text>
           {experiences.map((exp) => (
             <View key={exp.id} className="mb-4">
               <View className="flex-row justify-between items-start">
-                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{exp.jobTitle || 'Job Title'}</Text>
-                <Text className="text-[10px] text-gray-400 font-medium">{exp.startDate || ''} - {exp.current ? 'Present' : (exp.endDate || '')}</Text>
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2" style={{ fontFamily: previewFont }}>{exp.jobTitle || 'Job Title'}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium" style={{ fontFamily: previewFont }}>{exp.startDate || ''} - {exp.current ? 'Present' : (exp.endDate || '')}</Text>
               </View>
-              <Text className="text-[11px] font-semibold text-gray-500 italic mb-1">
+              <Text className="text-[11px] font-semibold text-gray-500 italic mb-1" style={{ fontFamily: previewFont }}>
                 {exp.company || 'Company'} {exp.location ? `• ${exp.location}` : ''}
               </Text>
-              {exp.description ? <Text className="text-xs text-gray-600 leading-normal text-justify">{exp.description}</Text> : null}
+              {exp.description ? <Text className="text-xs text-gray-600 leading-normal text-justify" style={{ fontFamily: previewFont }}>{exp.description}</Text> : null}
             </View>
           ))}
         </View>
@@ -707,14 +1201,14 @@ export default function CreateCVScreen() {
       if (educations.length === 0) return null;
       return (
         <View className="mb-5">
-          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Education</Text>
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color, fontFamily: previewFont }}>Education</Text>
           {educations.map((edu) => (
             <View key={edu.id} className="mb-3">
               <View className="flex-row justify-between items-start">
-                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{edu.degree || 'Degree'} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}</Text>
-                <Text className="text-[10px] text-gray-400 font-medium">{edu.startDate || ''} - {edu.current ? 'Present' : (edu.endDate || '')}</Text>
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2" style={{ fontFamily: previewFont }}>{edu.degree || 'Degree'} {edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium" style={{ fontFamily: previewFont }}>{edu.startDate || ''} - {edu.current ? 'Present' : (edu.endDate || '')}</Text>
               </View>
-              <Text className="text-[11px] font-semibold text-gray-500 italic">
+              <Text className="text-[11px] font-semibold text-gray-500 italic" style={{ fontFamily: previewFont }}>
                 {edu.school || 'School'} {edu.gpa ? `• GPA: ${edu.gpa}` : ''}
               </Text>
             </View>
@@ -728,14 +1222,213 @@ export default function CreateCVScreen() {
       if (skills.length === 0) return null;
       return (
         <View className="mb-5">
-          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color }}>Skills</Text>
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color, fontFamily: previewFont }}>Skills</Text>
           <View className="flex-row flex-wrap gap-1.5">
             {skills.map((skill, index) => (
               <View key={index} className="px-2.5 py-1 rounded-full border" style={{ backgroundColor: bg, borderColor: border }}>
-                <Text className="text-[10px] font-semibold" style={{ color }}>{skill}</Text>
+                <Text className="text-[10px] font-semibold" style={{ color, fontFamily: previewFont }}>{skill}</Text>
               </View>
             ))}
           </View>
+        </View>
+      );
+    };
+
+    // Helper: Render Languages
+    const renderLanguagesPreview = (color: string, bg: string, border: string, isSidebar = false) => {
+      if (!showLanguages || languages.length === 0) return null;
+      if (isSidebar) {
+        return (
+          <View className="mb-4">
+            <Text className="text-[10px] font-extrabold uppercase tracking-wider mb-2 text-white/70">Languages</Text>
+            {languages.map((l) => (
+              <View key={l.id} className="mb-2">
+                <Text className="text-[11px] font-bold text-white">{l.name || 'Language'}</Text>
+                {l.level ? <Text className="text-[9px] text-white/50">{l.level}</Text> : null}
+              </View>
+            ))}
+          </View>
+        );
+      }
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color }}>Languages</Text>
+          <View className="flex-row flex-wrap gap-1.5">
+            {languages.map((l) => (
+              <View key={l.id} className="px-2.5 py-1 rounded-full border" style={{ backgroundColor: bg, borderColor: border }}>
+                <Text className="text-[10px] font-semibold" style={{ color }}>{l.name || 'Language'}{l.level ? `: ${l.level}` : ''}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      );
+    };
+
+    // Helper: Render Certifications
+    const renderCertificationsPreview = (color: string, isSidebar = false) => {
+      if (!showCertifications || certifications.length === 0) return null;
+      if (isSidebar) {
+        return (
+          <View className="mb-4">
+            <Text className="text-[10px] font-extrabold uppercase tracking-wider mb-2 text-white/70">Certifications</Text>
+            {certifications.map((c) => (
+              <View key={c.id} className="mb-2">
+                <Text className="text-[11px] font-bold text-white">{c.name || 'Certificate'}</Text>
+                <Text className="text-[9px] text-white/50">{c.issuer || ''} {c.date ? `• ${c.date}` : ''}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      }
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Certifications & Licenses</Text>
+          {certifications.map((c) => (
+            <View key={c.id} className="mb-2">
+              <View className="flex-row justify-between items-start">
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{c.name || 'Certificate'}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">{c.date || ''}</Text>
+              </View>
+              {c.issuer ? <Text className="text-[11px] font-semibold text-gray-500 italic">{c.issuer}</Text> : null}
+            </View>
+          ))}
+        </View>
+      );
+    };
+
+    // Helper: Render Awards
+    const renderAwardsPreview = (color: string) => {
+      if (!showAwards || awards.length === 0) return null;
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>Awards & Honors</Text>
+          {awards.map((a) => (
+            <View key={a.id} className="mb-3">
+              <View className="flex-row justify-between items-start">
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{a.title || 'Award'}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">{a.date || ''}</Text>
+              </View>
+              <Text className="text-[11px] font-semibold text-gray-500 italic">{a.issuer || ''}</Text>
+              {a.description ? <Text className="text-xs text-gray-600 leading-normal mt-0.5">{a.description}</Text> : null}
+            </View>
+          ))}
+        </View>
+      );
+    };
+
+    // Helper: Render Websites
+    const renderWebsitesPreview = (color: string, isSidebar = false) => {
+      if (!showWebsites || websites.length === 0) return null;
+      if (isSidebar) {
+        return (
+          <View className="mb-4">
+            <Text className="text-[10px] font-extrabold uppercase tracking-wider mb-2 text-white/70">Links</Text>
+            {websites.map((w) => (
+              <View key={w.id} className="mb-2">
+                <Text className="text-[11px] font-bold text-white">{w.label || 'Link'}</Text>
+                <Text className="text-[10px] text-blue-300">{w.url}</Text>
+              </View>
+            ))}
+          </View>
+        );
+      }
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color }}>Websites & Links</Text>
+          <View className="flex-row flex-wrap gap-x-4 gap-y-1">
+            {websites.map((w) => (
+              <Text key={w.id} className="text-xs text-gray-700">
+                <Text className="font-bold">{w.label || 'Link'}: </Text>
+                <Text style={{ color }}>{w.url}</Text>
+              </Text>
+            ))}
+          </View>
+        </View>
+      );
+    };
+
+    // Helper: Render References
+    const renderReferencesPreview = (color: string) => {
+      if (!showReferences || references.length === 0) return null;
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>References</Text>
+          <View className="flex-row flex-wrap justify-between gap-y-3">
+            {references.map((r) => (
+              <View key={r.id} className="w-[48%]">
+                <Text className="text-xs font-bold text-gray-800">{r.name || 'Reference'}</Text>
+                <Text className="text-[10px] text-gray-500 font-medium">
+                  {r.relationship || ''} {r.company ? `• ${r.company}` : ''}
+                </Text>
+                {r.email ? <Text className="text-[10px] text-gray-400">Email: {r.email}</Text> : null}
+                {r.phone ? <Text className="text-[10px] text-gray-400">Phone: {r.phone}</Text> : null}
+              </View>
+            ))}
+          </View>
+        </View>
+      );
+    };
+
+    // Helper: Render Hobbies
+    const renderHobbiesPreview = (color: string, bg: string, border: string, isSidebar = false) => {
+      if (!showHobbies || hobbies.length === 0) return null;
+      if (isSidebar) {
+        return (
+          <View className="mb-4">
+            <Text className="text-[10px] font-extrabold uppercase tracking-wider mb-2 text-white/70">Hobbies & Interests</Text>
+            <View className="flex-row flex-wrap gap-1">
+              {hobbies.map((h, i) => (
+                <View key={i} className="px-2 py-0.5 rounded bg-white/10">
+                  <Text className="text-[9px] font-semibold text-white">{h}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        );
+      }
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-2" style={{ color }}>Hobbies & Interests</Text>
+          <View className="flex-row flex-wrap gap-1.5">
+            {hobbies.map((h, i) => (
+              <View key={i} className="px-2.5 py-1 rounded-full border" style={{ backgroundColor: bg, borderColor: border }}>
+                <Text className="text-[10px] font-semibold" style={{ color }}>{h}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      );
+    };
+
+    // Helper: Render Custom Section
+    const renderCustomSectionPreview = (color: string, isSidebar = false) => {
+      if (!showCustomSection || customSectionItems.length === 0) return null;
+      if (isSidebar) {
+        return (
+          <View className="mb-4">
+            <Text className="text-[10px] font-extrabold uppercase tracking-wider mb-2 text-white/70">{customSectionTitle}</Text>
+            {customSectionItems.map((item) => (
+              <View key={item.id} className="mb-2">
+                <Text className="text-[11px] font-bold text-white">{item.title || 'Item'}</Text>
+                {item.subtitle ? <Text className="text-[9px] text-white/50">{item.subtitle}</Text> : null}
+                {item.description ? <Text className="text-[9px] text-white/70 mt-0.5">{item.description}</Text> : null}
+              </View>
+            ))}
+          </View>
+        );
+      }
+      return (
+        <View className="mb-5">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wider mb-3" style={{ color }}>{customSectionTitle}</Text>
+          {customSectionItems.map((item) => (
+            <View key={item.id} className="mb-3">
+              <View className="flex-row justify-between items-start">
+                <Text className="text-xs font-bold text-gray-800 flex-1 pr-2">{item.title || 'Item Title'}</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">{item.subtitle || ''}</Text>
+              </View>
+              {item.description ? <Text className="text-xs text-gray-600 leading-normal mt-0.5">{item.description}</Text> : null}
+            </View>
+          ))}
         </View>
       );
     };
@@ -769,6 +1462,13 @@ export default function CreateCVScreen() {
           {renderExperiencePreview('#111827')}
           {renderEducationPreview('#111827')}
           {renderSkillsPreview('#374151', '#f9fafb', '#e5e7eb')}
+          {renderLanguagesPreview('#374151', '#f9fafb', '#e5e7eb')}
+          {renderCertificationsPreview('#374151')}
+          {renderAwardsPreview('#374151')}
+          {renderWebsitesPreview('#3b82f6')}
+          {renderReferencesPreview('#374151')}
+          {renderHobbiesPreview('#374151', '#f9fafb', '#e5e7eb')}
+          {renderCustomSectionPreview('#374151')}
         </View>
       );
     }
@@ -795,11 +1495,18 @@ export default function CreateCVScreen() {
                 <View className="flex-row flex-wrap gap-1">{skills.map((s, i) => (<View key={i} className="bg-gray-900 px-2 py-1 rounded"><Text className="text-white text-[8px] font-bold">{s}</Text></View>))}</View>
               </View>
             )}
+            {renderLanguagesPreview('#111827', '#f3f4f6', '#e5e7eb', true)}
+            {renderWebsitesPreview('#3b82f6', true)}
+            {renderHobbiesPreview('#111827', '#f3f4f6', '#e5e7eb', true)}
           </View>
           <View className="w-[65%] p-4 pt-6 bg-white">
             {summary ? <View className="mb-5"><Text className="text-[10px] font-extrabold text-gray-900 uppercase tracking-wider mb-2 pb-1 border-b border-gray-100">Summary</Text><Text className="text-[11px] text-gray-600 leading-relaxed text-justify">{summary}</Text></View> : null}
             {renderExperiencePreview('#111827')}
             {renderEducationPreview('#111827')}
+            {renderCertificationsPreview('#111827')}
+            {renderAwardsPreview('#111827')}
+            {renderReferencesPreview('#111827')}
+            {renderCustomSectionPreview('#111827')}
           </View>
         </View>
       );
@@ -826,6 +1533,13 @@ export default function CreateCVScreen() {
             {renderExperiencePreview('#1f2937')}
             {renderEducationPreview('#1f2937')}
             {renderSkillsPreview('#1f2937', '#f3f4f6', '#e5e7eb')}
+            {renderLanguagesPreview('#1f2937', '#f3f4f6', '#e5e7eb')}
+            {renderCertificationsPreview('#1f2937')}
+            {renderAwardsPreview('#1f2937')}
+            {renderWebsitesPreview('#3b82f6')}
+            {renderReferencesPreview('#1f2937')}
+            {renderHobbiesPreview('#1f2937', '#f3f4f6', '#e5e7eb')}
+            {renderCustomSectionPreview('#1f2937')}
           </View>
         </View>
       );
@@ -842,6 +1556,13 @@ export default function CreateCVScreen() {
             {renderExperiencePreview('#111827')}
             {renderEducationPreview('#111827')}
             {renderSkillsPreview('#065f46', '#ecfdf5', '#a7f3d0')}
+            {renderLanguagesPreview('#111827', '#ecfdf5', '#a7f3d0')}
+            {renderCertificationsPreview('#111827')}
+            {renderAwardsPreview('#111827')}
+            {renderWebsitesPreview('#3b82f6')}
+            {renderReferencesPreview('#111827')}
+            {renderHobbiesPreview('#111827', '#ecfdf5', '#a7f3d0')}
+            {renderCustomSectionPreview('#111827')}
           </View>
         </View>
       );
@@ -866,10 +1587,17 @@ export default function CreateCVScreen() {
             <View className="w-[65%]">
               {summary ? <View className="mb-4"><Text className="font-bold text-indigo-900 border-b border-gray-150 pb-1 text-xs">Summary</Text><Text className="text-xs text-gray-600 mt-2">{summary}</Text></View> : null}
               {renderExperiencePreview('#1e1b4b')}
+              {renderAwardsPreview('#1e1b4b')}
+              {renderReferencesPreview('#1e1b4b')}
+              {renderCustomSectionPreview('#1e1b4b')}
             </View>
             <View className="w-[35%]">
               {renderEducationPreview('#1e1b4b')}
               {renderSkillsPreview('#1e1b4b', '#f3f4f6', '#e5e7eb')}
+              {renderLanguagesPreview('#1e1b4b', '#f3f4f6', '#e5e7eb', true)}
+              {renderWebsitesPreview('#3b82f6', true)}
+              {renderCertificationsPreview('#1e1b4b', true)}
+              {renderHobbiesPreview('#1e1b4b', '#f3f4f6', '#e5e7eb', true)}
             </View>
           </View>
         </View>
@@ -894,6 +1622,13 @@ export default function CreateCVScreen() {
           {renderExperiencePreview('#0d9488')}
           {renderEducationPreview('#0d9488')}
           {renderSkillsPreview('#115e59', '#f0fdf4', '#ccfbf1')}
+          {renderLanguagesPreview('#115e59', '#f0fdf4', '#ccfbf1')}
+          {renderCertificationsPreview('#115e59')}
+          {renderAwardsPreview('#115e59')}
+          {renderWebsitesPreview('#3b82f6')}
+          {renderReferencesPreview('#115e59')}
+          {renderHobbiesPreview('#115e59', '#f0fdf4', '#ccfbf1')}
+          {renderCustomSectionPreview('#115e59')}
         </View>
       );
     }
@@ -911,6 +1646,13 @@ export default function CreateCVScreen() {
             {renderExperiencePreview('#dc2626')}
             {renderEducationPreview('#dc2626')}
             {renderSkillsPreview('#991b1b', '#fef2f2', '#fee2e2')}
+            {renderLanguagesPreview('#dc2626', '#fef2f2', '#fee2e2')}
+            {renderCertificationsPreview('#dc2626')}
+            {renderAwardsPreview('#dc2626')}
+            {renderWebsitesPreview('#3b82f6')}
+            {renderReferencesPreview('#dc2626')}
+            {renderHobbiesPreview('#dc2626', '#fef2f2', '#fee2e2')}
+            {renderCustomSectionPreview('#dc2626')}
           </View>
         </View>
       );
@@ -929,6 +1671,86 @@ export default function CreateCVScreen() {
           {renderExperiencePreview('#059669')}
           {renderEducationPreview('#059669')}
           {skills.length > 0 && <View className="mb-4 pl-3 border-l border-gray-200"><Text className="text-xs font-bold text-emerald-600">{'> SKILLS'}</Text><View className="flex-row flex-wrap gap-1 mt-2">{skills.map((s, i) => (<View key={i} className="bg-slate-900 px-2 py-0.5 rounded"><Text className="text-emerald-400 text-[9px] font-mono">{s}</Text></View>))}</View></View>}
+          {showLanguages && languages.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> LANGUAGES'}</Text>
+              <View className="flex-row flex-wrap gap-1 mt-2">
+                {languages.map((l) => (
+                  <View key={l.id} className="bg-slate-900 px-2 py-0.5 rounded">
+                    <Text className="text-emerald-400 text-[9px] font-mono">{l.name}{l.level ? `: ${l.level}` : ''}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+          {showCertifications && certifications.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> CERTIFICATIONS'}</Text>
+              {certifications.map((c) => (
+                <View key={c.id} className="mt-1">
+                  <Text className="text-[11px] text-gray-800 font-mono font-bold">{c.name}</Text>
+                  {c.issuer ? <Text className="text-[10px] text-gray-500 font-mono">{c.issuer} {c.date ? `(${c.date})` : ''}</Text> : null}
+                </View>
+              ))}
+            </View>
+          )}
+          {showAwards && awards.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> AWARDS'}</Text>
+              {awards.map((a) => (
+                <View key={a.id} className="mt-1">
+                  <Text className="text-[11px] text-gray-800 font-mono font-bold">{a.title}</Text>
+                  {a.issuer ? <Text className="text-[10px] text-gray-500 font-mono">{a.issuer} {a.date ? `(${a.date})` : ''}</Text> : null}
+                  {a.description ? <Text className="text-[10px] text-gray-500 font-mono">{a.description}</Text> : null}
+                </View>
+              ))}
+            </View>
+          )}
+          {showWebsites && websites.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> LINKS'}</Text>
+              {websites.map((w) => (
+                <Text key={w.id} className="text-[10px] text-gray-650 font-mono mt-1">
+                  {w.label}: <Text className="text-emerald-600">{w.url}</Text>
+                </Text>
+              ))}
+            </View>
+          )}
+          {showReferences && references.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> REFERENCES'}</Text>
+              {references.map((r) => (
+                <View key={r.id} className="mt-1">
+                  <Text className="text-[11px] text-gray-800 font-mono font-bold">{r.name}</Text>
+                  <Text className="text-[10px] text-gray-500 font-mono">{r.relationship} @ {r.company}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {showHobbies && hobbies.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{'> HOBBIES'}</Text>
+              <View className="flex-row flex-wrap gap-1 mt-2">
+                {hobbies.map((h, i) => (
+                  <View key={i} className="bg-slate-900 px-2 py-0.5 rounded">
+                    <Text className="text-emerald-400 text-[9px] font-mono">{h}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+          {showCustomSection && customSectionItems.length > 0 && (
+            <View className="mb-4 pl-3 border-l border-gray-200">
+              <Text className="text-xs font-bold text-emerald-600">{`> ${customSectionTitle.toUpperCase()}`}</Text>
+              {customSectionItems.map((item) => (
+                <View key={item.id} className="mt-1">
+                  <Text className="text-[11px] text-gray-800 font-mono font-bold">{item.title}</Text>
+                  {item.subtitle ? <Text className="text-[10px] text-gray-500 font-mono">{item.subtitle}</Text> : null}
+                  {item.description ? <Text className="text-[10px] text-gray-600 font-mono mt-0.5">{item.description}</Text> : null}
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       );
     }
@@ -952,11 +1774,18 @@ export default function CreateCVScreen() {
                 <View className="flex-row flex-wrap gap-1">{skills.map((s, i) => (<View key={i} className="bg-slate-600 px-2 py-1 rounded"><Text className="text-white text-[8px] font-bold">{s}</Text></View>))}</View>
               </View>
             )}
+            {renderLanguagesPreview('#38bdf8', '#475569', '#64748b', true)}
+            {renderWebsitesPreview('#38bdf8', true)}
+            {renderHobbiesPreview('#38bdf8', '#475569', '#64748b', true)}
           </View>
           <View className="w-[60%] p-4 pt-6 bg-white">
             {summary ? <View className="mb-4"><Text className="text-gray-900 font-bold border-b border-gray-150 pb-1 text-[10px]">SUMMARY</Text><Text className="text-[11px] text-gray-600 mt-2">{summary}</Text></View> : null}
             {renderExperiencePreview('#1f2937')}
             {renderEducationPreview('#1f2937')}
+            {renderCertificationsPreview('#1f2937')}
+            {renderAwardsPreview('#1f2937')}
+            {renderReferencesPreview('#1f2937')}
+            {renderCustomSectionPreview('#1f2937')}
           </View>
         </View>
       );
@@ -980,7 +1809,14 @@ export default function CreateCVScreen() {
         ) : null}
         {renderExperiencePreview('#2563eb')}
         {renderEducationPreview('#2563eb')}
-        {renderSkillsPreview('#1e40af', '#eff6ff', '#dbeafe')}
+        {renderSkillsPreview(accentColor, hexToRgba(accentColor, 0.08), hexToRgba(accentColor, 0.2))}
+        {renderLanguagesPreview(accentColor, hexToRgba(accentColor, 0.08), hexToRgba(accentColor, 0.2))}
+        {renderCertificationsPreview(accentColor)}
+        {renderAwardsPreview(accentColor)}
+        {renderWebsitesPreview(accentColor)}
+        {renderReferencesPreview(accentColor)}
+        {renderHobbiesPreview(accentColor, hexToRgba(accentColor, 0.08), hexToRgba(accentColor, 0.2))}
+        {renderCustomSectionPreview(accentColor)}
       </View>
     );
   };
@@ -1409,6 +2245,865 @@ export default function CreateCVScreen() {
                   </View>
                   <View className="flex-row justify-between mt-8 gap-4">
                     <TouchableOpacity onPress={() => setActiveTab('SKILLS')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
+                      <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setActiveTab('ADD')} className="bg-[#2563EB] px-6 py-4 rounded-2xl flex-row items-center justify-center flex-1" style={styles.nextShadow}>
+                      <Text className="text-white font-bold text-sm">Next: Additional Sections</Text>
+                      <Ionicons name="arrow-forward" size={16} color="white" style={{ marginLeft: 6 }} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+ 
+              {/* TAB: ADD (Additional Sections) */}
+              {activeTab === 'ADD' && (
+                <View className="pb-10">
+                  <Text className="text-3xl font-extrabold text-gray-900 mb-2">Additional Sections</Text>
+                  <Text className="text-sm text-gray-500 mb-6">
+                    Add certifications, languages, awards, or any extra details you want recruiters to see.
+                  </Text>
+
+                  {/* GRID OF TOGGLES */}
+                  <View className="flex-row flex-wrap justify-between mb-6">
+                    {/* CARD: Languages */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowLanguages(!showLanguages);
+                        if (!showLanguages && languages.length === 0) {
+                          setLanguages([{ id: Date.now().toString(), name: '', level: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showLanguages ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="globe-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Languages</Text>
+                      </View>
+                      <Ionicons 
+                        name={showLanguages ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showLanguages ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: Certifications */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowCertifications(!showCertifications);
+                        if (!showCertifications && certifications.length === 0) {
+                          setCertifications([{ id: Date.now().toString(), name: '', issuer: '', date: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showCertifications ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="ribbon-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Certifications and licenses</Text>
+                      </View>
+                      <Ionicons 
+                        name={showCertifications ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showCertifications ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: Awards */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowAwards(!showAwards);
+                        if (!showAwards && awards.length === 0) {
+                          setAwards([{ id: Date.now().toString(), title: '', issuer: '', date: '', description: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showAwards ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="trophy-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Awards and honors</Text>
+                      </View>
+                      <Ionicons 
+                        name={showAwards ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showAwards ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: Websites */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowWebsites(!showWebsites);
+                        if (!showWebsites && websites.length === 0) {
+                          setWebsites([{ id: Date.now().toString(), label: '', url: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showWebsites ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="link-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Websites and social media</Text>
+                      </View>
+                      <Ionicons 
+                        name={showWebsites ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showWebsites ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: References */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowReferences(!showReferences);
+                        if (!showReferences && references.length === 0) {
+                          setReferences([{ id: Date.now().toString(), name: '', relationship: '', company: '', email: '', phone: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showReferences ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="people-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>References</Text>
+                      </View>
+                      <Ionicons 
+                        name={showReferences ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showReferences ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: Hobbies */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowHobbies(!showHobbies);
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showHobbies ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="game-controller-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Hobbies and interests</Text>
+                      </View>
+                      <Ionicons 
+                        name={showHobbies ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showHobbies ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+
+                    {/* CARD: Custom Section */}
+                    <TouchableOpacity 
+                      onPress={() => {
+                        setShowCustomSection(!showCustomSection);
+                        if (!showCustomSection && customSectionItems.length === 0) {
+                          setCustomSectionItems([{ id: Date.now().toString(), title: '', subtitle: '', description: '' }]);
+                        }
+                      }}
+                      className={`w-[48%] border rounded-3xl p-4 mb-4 flex-row items-center justify-between bg-white ${showCustomSection ? 'border-blue-500' : 'border-gray-200'}`}
+                      style={styles.previewShadow}
+                    >
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-10 h-10 rounded-xl bg-blue-50 items-center justify-center">
+                          <Ionicons name="grid-outline" size={18} color="#3B82F6" />
+                        </View>
+                        <Text className="text-xs font-bold text-gray-800 flex-1 pr-1" numberOfLines={2}>Custom section</Text>
+                      </View>
+                      <Ionicons 
+                        name={showCustomSection ? "checkmark-circle" : "add"} 
+                        size={18} 
+                        color={showCustomSection ? "#3B82F6" : "#9CA3AF"} 
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* ACTIVE FORMS SECTION */}
+                  <View className="mt-4">
+                    {/* LANGUAGES FORM */}
+                    {showLanguages && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="globe-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">Languages</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowLanguages(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {languages.map((lang, index) => (
+                          <View key={lang.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Language #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeLanguage(lang.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            <View className="flex-row gap-3">
+                              <View className="flex-1">
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">LANGUAGE</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. French" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={lang.name} 
+                                  onChangeText={t => updateLanguage(lang.id, 'name', t)} 
+                                />
+                              </View>
+                              <View className="flex-1">
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">PROFICIENCY</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Fluent / C1" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={lang.level} 
+                                  onChangeText={t => updateLanguage(lang.id, 'level', t)} 
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addLanguage}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Language</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* CERTIFICATIONS FORM */}
+                    {showCertifications && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="ribbon-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">Certifications and licenses</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowCertifications(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {certifications.map((cert, index) => (
+                          <View key={cert.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Certification #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeCertification(cert.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            <View className="space-y-3">
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">CERTIFICATE NAME</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. AWS Certified Solutions Architect" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={cert.name} 
+                                  onChangeText={t => updateCertification(cert.id, 'name', t)} 
+                                />
+                              </View>
+                              <View className="flex-row gap-3">
+                                <View className="flex-[2]">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">ISSUER / ORGANIZATION</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. Amazon Web Services" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={cert.issuer} 
+                                    onChangeText={t => updateCertification(cert.id, 'issuer', t)} 
+                                  />
+                                </View>
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">YEAR</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. 2024" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={cert.date} 
+                                    onChangeText={t => updateCertification(cert.id, 'date', t)} 
+                                  />
+                                </View>
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addCertification}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Certification</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* AWARDS FORM */}
+                    {showAwards && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="trophy-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">Awards and honors</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowAwards(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {awards.map((aw, index) => (
+                          <View key={aw.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Award #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeAward(aw.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            <View className="space-y-3">
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">AWARD TITLE</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Employee of the Year" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={aw.title} 
+                                  onChangeText={t => updateAward(aw.id, 'title', t)} 
+                                />
+                              </View>
+                              <View className="flex-row gap-3">
+                                <View className="flex-[2]">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">ISSUING ENTITY</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. Acme Corporation" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={aw.issuer} 
+                                    onChangeText={t => updateAward(aw.id, 'issuer', t)} 
+                                  />
+                                </View>
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">YEAR</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. 2023" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={aw.date} 
+                                    onChangeText={t => updateAward(aw.id, 'date', t)} 
+                                  />
+                                </View>
+                              </View>
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">DESCRIPTION / DETAILS</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Selected from over 200 staff..." 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={aw.description} 
+                                  onChangeText={t => updateAward(aw.id, 'description', t)} 
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addAward}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Award</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* WEBSITES FORM */}
+                    {showWebsites && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="link-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">Websites and social media</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowWebsites(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {websites.map((web, index) => (
+                          <View key={web.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Link #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeWebsite(web.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            <View className="flex-row gap-3">
+                              <View className="flex-1">
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">PLATFORM / LABEL</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Portfolio" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={web.label} 
+                                  onChangeText={t => updateWebsite(web.id, 'label', t)} 
+                                />
+                              </View>
+                              <View className="flex-[2]">
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">URL</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. portfolio.com" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={web.url} 
+                                  onChangeText={t => updateWebsite(web.id, 'url', t)} 
+                                  autoCapitalize="none"
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addWebsite}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Web Link</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* REFERENCES FORM */}
+                    {showReferences && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="people-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">References</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowReferences(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {references.map((ref, index) => (
+                          <View key={ref.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Reference #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeReference(ref.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            <View className="space-y-3">
+                              <View className="flex-row gap-3">
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">FULL NAME</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. Jane Smith" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={ref.name} 
+                                    onChangeText={t => updateReference(ref.id, 'name', t)} 
+                                  />
+                                </View>
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">RELATIONSHIP</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="e.g. Manager" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={ref.relationship} 
+                                    onChangeText={t => updateReference(ref.id, 'relationship', t)} 
+                                  />
+                                </View>
+                              </View>
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">COMPANY</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Google LLC" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={ref.company} 
+                                  onChangeText={t => updateReference(ref.id, 'company', t)} 
+                                />
+                              </View>
+                              <View className="flex-row gap-3">
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">EMAIL</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="janesmith@google.com" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={ref.email} 
+                                    onChangeText={t => updateReference(ref.id, 'email', t)} 
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                  />
+                                </View>
+                                <View className="flex-1">
+                                  <Text className="text-[10px] font-bold text-gray-400 mb-1">PHONE</Text>
+                                  <TextInput 
+                                    className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                    placeholder="+1 555 123 456" 
+                                    placeholderTextColor="#9CA3AF"
+                                    value={ref.phone} 
+                                    onChangeText={t => updateReference(ref.id, 'phone', t)} 
+                                    keyboardType="phone-pad"
+                                  />
+                                </View>
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addReference}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Reference</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    {/* HOBBIES AND INTERESTS FORM */}
+                    {showHobbies && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="game-controller-outline" size={20} color="#3B82F6" />
+                            <Text className="text-base font-bold text-gray-800">Hobbies and interests</Text>
+                          </View>
+                          <TouchableOpacity onPress={() => setShowHobbies(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        <View className="mb-4">
+                          <Text className="text-xs font-bold text-gray-450 mb-2">ADD A HOBBY</Text>
+                          <View className="flex-row gap-2">
+                            <TextInput 
+                              className="flex-1 bg-white border border-gray-250 rounded-2xl px-4 py-3 text-sm text-gray-900 font-medium" 
+                              placeholder="e.g. Photography (Press Add)" 
+                              placeholderTextColor="#9CA3AF"
+                              value={newHobby} 
+                              onChangeText={setNewHobby} 
+                              onSubmitEditing={addHobby} 
+                            />
+                            <TouchableOpacity onPress={addHobby} className="bg-blue-600 px-5 py-3 rounded-2xl justify-center">
+                              <Text className="text-white text-xs font-bold">Add</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+
+                        {hobbies.length > 0 ? (
+                          <View className="flex-row flex-wrap gap-2">
+                            {hobbies.map((hobby, index) => (
+                              <View key={index} className="bg-blue-50 border border-blue-100 px-3.5 py-1.5 rounded-full flex-row items-center">
+                                <Text className="text-blue-800 font-bold text-xs mr-2">{hobby}</Text>
+                                <TouchableOpacity onPress={() => removeHobby(index)}>
+                                  <Ionicons name="close-circle" size={14} color="#1d4ed8" />
+                                </TouchableOpacity>
+                              </View>
+                            ))}
+                          </View>
+                        ) : (
+                          <Text className="text-gray-400 italic text-xs">No hobbies added yet.</Text>
+                        )}
+                      </View>
+                    )}
+
+                    {/* CUSTOM SECTION FORM */}
+                    {showCustomSection && (
+                      <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white shadow-sm">
+                        <View className="flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                          <View className="flex-row items-center gap-3">
+                            <Ionicons name="grid-outline" size={20} color="#3B82F6" />
+                            <TextInput 
+                              className="text-base font-bold text-gray-800 border-b border-dashed border-gray-300 min-w-[150px] pb-0.5" 
+                              value={customSectionTitle} 
+                              onChangeText={setCustomSectionTitle} 
+                              placeholder="Custom Section Title"
+                            />
+                          </View>
+                          <TouchableOpacity onPress={() => setShowCustomSection(false)}>
+                            <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+                          </TouchableOpacity>
+                        </View>
+
+                        {customSectionItems.map((item, index) => (
+                          <View key={item.id} className="mb-4 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                            <View className="flex-row justify-between items-center mb-3">
+                              <Text className="text-xs font-bold text-gray-500">Item #{index + 1}</Text>
+                              <TouchableOpacity onPress={() => removeCustomSectionItem(item.id)}>
+                                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                              </TouchableOpacity>
+                            </View>
+                            
+                            <View className="space-y-3 gap-2">
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">TITLE</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Project Name / Volunteer Role" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={item.title} 
+                                  onChangeText={t => updateCustomSectionItem(item.id, 'title', t)} 
+                                />
+                              </View>
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">SUBTITLE / DATE</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Red Cross (2020 - 2022)" 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={item.subtitle} 
+                                  onChangeText={t => updateCustomSectionItem(item.id, 'subtitle', t)} 
+                                />
+                              </View>
+                              <View>
+                                <Text className="text-[10px] font-bold text-gray-400 mb-1">DESCRIPTION</Text>
+                                <TextInput 
+                                  className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
+                                  placeholder="e.g. Key achievements and duties..." 
+                                  placeholderTextColor="#9CA3AF"
+                                  value={item.description} 
+                                  onChangeText={t => updateCustomSectionItem(item.id, 'description', t)} 
+                                  multiline
+                                />
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                        <TouchableOpacity 
+                          onPress={addCustomSectionItem}
+                          className="py-3 bg-blue-50 border border-blue-100 rounded-2xl items-center justify-center flex-row"
+                        >
+                          <Ionicons name="add" size={16} color="#3B82F6" />
+                          <Text className="text-blue-600 font-bold text-xs ml-1">Add Custom Item</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+
+                  <View className="flex-row justify-between mt-8 gap-4">
+                    <TouchableOpacity onPress={() => setActiveTab('SUMMARY')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
+                      <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setActiveTab('LAYOUT')} className="bg-[#2563EB] px-6 py-4 rounded-2xl flex-row items-center justify-center flex-1" style={styles.nextShadow}>
+                      <Text className="text-white font-bold text-sm">Next: Layout Configuration</Text>
+                      <Ionicons name="arrow-forward" size={16} color="white" style={{ marginLeft: 6 }} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {/* TAB: LAYOUT */}
+              {activeTab === 'LAYOUT' && (
+                <View className="pb-10">
+                  <Text className="text-3xl font-extrabold text-gray-900 mb-6">Layout Configuration</Text>
+
+                  {/* ACCENT COLOR */}
+                  <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white" style={styles.previewShadow}>
+                    <View className="flex-row justify-between items-center mb-4">
+                      <View className="flex-row items-center gap-3">
+                        <View className="w-8 h-8 rounded-full bg-red-50 items-center justify-center">
+                          <Ionicons name="color-palette-outline" size={18} color="#EF4444" />
+                        </View>
+                        <Text className="text-base font-bold text-gray-800">Accent Theme Color</Text>
+                      </View>
+                      <View className="bg-gray-100 rounded-full px-3 py-1 flex-row items-center gap-1.5 border border-gray-200">
+                        <View className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: accentColor }} />
+                        <Text className="text-[10px] font-mono font-bold text-gray-500 uppercase">{accentColor}</Text>
+                      </View>
+                    </View>
+
+                    <View className="flex-row flex-wrap gap-2.5 mb-2">
+                      {[
+                        '#00A3FF', // Blue
+                        '#6366F1', // Indigo
+                        '#10B981', // Teal
+                        '#F43F5E', // Rose
+                        '#F59E0B', // Orange
+                        '#8B5CF6', // Purple
+                        '#3B82F6', // Royal Blue
+                        '#374151', // Slate
+                        '#000000', // Black
+                      ].map(color => {
+                        const isSelected = accentColor === color && !showCustomColorInput;
+                        return (
+                          <TouchableOpacity
+                            key={color}
+                            onPress={() => {
+                              setAccentColor(color);
+                              setShowCustomColorInput(false);
+                            }}
+                            className="w-12 h-12 rounded-2xl items-center justify-center border border-gray-200"
+                            style={{ backgroundColor: color }}
+                          >
+                            {isSelected && <Ionicons name="checkmark" size={18} color="white" />}
+                          </TouchableOpacity>
+                        );
+                      })}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowCustomColorInput(true);
+                          setAccentColor(customColorText);
+                        }}
+                        className={`px-4 py-3 rounded-2xl border items-center justify-center ${showCustomColorInput ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200 bg-white'}`}
+                      >
+                        <Text className={`text-xs font-bold ${showCustomColorInput ? 'text-blue-600' : 'text-gray-500'}`}>CUSTOM</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {showCustomColorInput && (
+                      <View className="mt-3 pt-3 border-t border-gray-100">
+                        <Text className="text-[10px] font-bold text-gray-400 mb-1.5 uppercase">ENTER CUSTOM HEX COLOR</Text>
+                        <View className="flex-row items-center gap-3">
+                          <View className="w-10 h-10 rounded-xl border border-gray-200" style={{ backgroundColor: customColorText }} />
+                          <TextInput
+                            className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3 text-sm text-gray-800 font-mono"
+                            placeholder="#00A3FF"
+                            placeholderTextColor="#9CA3AF"
+                            value={customColorText}
+                            onChangeText={t => {
+                              setCustomColorText(t);
+                              if (t.match(/^#[0-9A-Fa-f]{6}$/)) {
+                                setAccentColor(t);
+                              }
+                            }}
+                            maxLength={7}
+                            autoCapitalize="none"
+                          />
+                        </View>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* SPACING */}
+                  <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white" style={styles.previewShadow}>
+                    <View className="flex-row items-center gap-3 mb-4">
+                      <View className="w-8 h-8 rounded-full bg-blue-50 items-center justify-center">
+                        <Ionicons name="document-text-outline" size={18} color="#3B82F6" />
+                      </View>
+                      <Text className="text-base font-bold text-gray-800">Margins & Document Spacing</Text>
+                    </View>
+
+                    <View className="flex-row gap-3">
+                      {[
+                        { id: 'compact', label: 'Compact', desc: '0.4in margins', padding: 'p-1' },
+                        { id: 'normal', label: 'Normal', desc: '0.6in margins', padding: 'p-2' },
+                        { id: 'loose', label: 'Loose', desc: '0.8in margins', padding: 'p-3' }
+                      ].map(opt => {
+                        const isSelected = marginSize === opt.id;
+                        return (
+                          <TouchableOpacity
+                            key={opt.id}
+                            onPress={() => setMarginSize(opt.id as any)}
+                            className={`flex-1 p-4 rounded-2xl border items-center justify-center bg-white ${isSelected ? 'border-blue-500 bg-blue-50/10' : 'border-gray-200'}`}
+                            style={isSelected ? styles.tabActiveShadow : undefined}
+                          >
+                            {/* Inner Visual Representation of Margin */}
+                            <View className="w-12 h-12 border border-gray-200 rounded-lg bg-gray-50 items-center justify-center mb-3">
+                              <View className={`w-10 h-10 border border-dashed border-blue-300 rounded ${opt.padding} bg-white`} />
+                            </View>
+                            <Text className={`text-xs font-bold ${isSelected ? 'text-blue-600' : 'text-gray-700'}`}>{opt.label}</Text>
+                            <Text className="text-[9px] text-gray-400 font-medium mt-0.5">{opt.desc}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  {/* TYPOGRAPHY BASE SIZE */}
+                  <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white" style={styles.previewShadow}>
+                    <View className="flex-row items-center gap-3 mb-4">
+                      <View className="w-8 h-8 rounded-full bg-indigo-50 items-center justify-center">
+                        <Ionicons name="options-outline" size={18} color="#6366F1" />
+                      </View>
+                      <Text className="text-base font-bold text-gray-800">Typography Base Size</Text>
+                    </View>
+
+                    <View className="flex-row gap-3">
+                      {[
+                        { id: 'small', label: 'Small', desc: '11px-12px text', sizeClass: 'text-xs' },
+                        { id: 'medium', label: 'Medium', desc: '13px-14px text', sizeClass: 'text-sm' },
+                        { id: 'large', label: 'Large', desc: '15px-16px text', sizeClass: 'text-base' }
+                      ].map(opt => {
+                        const isSelected = typographySize === opt.id;
+                        return (
+                          <TouchableOpacity
+                            key={opt.id}
+                            onPress={() => setTypographySize(opt.id as any)}
+                            className={`flex-1 p-4 rounded-2xl border items-center justify-center bg-white ${isSelected ? 'border-blue-500 bg-blue-50/10' : 'border-gray-200'}`}
+                            style={isSelected ? styles.tabActiveShadow : undefined}
+                          >
+                            <View className="w-10 h-10 border border-gray-200 rounded-lg bg-gray-50 items-center justify-center mb-3">
+                              <Text className={`font-black text-gray-400 ${opt.sizeClass}`}>A</Text>
+                            </View>
+                            <Text className={`text-xs font-bold ${isSelected ? 'text-blue-600' : 'text-gray-700'}`}>{opt.label}</Text>
+                            <Text className="text-[9px] text-gray-400 font-medium mt-0.5">{opt.desc}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  {/* DOCUMENT FONT */}
+                  <View className="border border-gray-200 rounded-3xl p-5 mb-5 bg-white" style={styles.previewShadow}>
+                    <View className="flex-row items-center gap-3 mb-4">
+                      <View className="w-8 h-8 rounded-full bg-violet-50 items-center justify-center">
+                        <Ionicons name="text-outline" size={18} color="#8B5CF6" />
+                      </View>
+                      <Text className="text-base font-bold text-gray-800">Document Font</Text>
+                    </View>
+ 
+                    <View className="flex-row flex-wrap gap-2 justify-between">
+                      {[
+                        { name: 'Inter', isSerif: false },
+                        { name: 'Outfit', isSerif: false },
+                        { name: 'Montserrat', isSerif: false },
+                        { name: 'Roboto', isSerif: false },
+                        { name: 'Playfair', isSerif: true },
+                        { name: 'Merriweather', isSerif: true },
+                        { name: 'Lora', isSerif: true },
+                        { name: 'Times', isSerif: true },
+                        { name: 'Fira Code', isMonospace: true }
+                      ].map(font => {
+                        const isSelected = documentFont === font.name;
+                        return (
+                          <TouchableOpacity
+                            key={font.name}
+                            onPress={() => setDocumentFont(font.name)}
+                            className={`w-[31%] p-3 mb-2.5 rounded-2xl border items-center justify-center bg-white ${isSelected ? 'border-blue-500 bg-blue-50/10' : 'border-gray-200'}`}
+                            style={isSelected ? styles.tabActiveShadow : undefined}
+                          >
+                            <View className="w-10 h-10 border border-gray-200 rounded-lg bg-gray-50 items-center justify-center mb-2">
+                              <Text className={`text-sm font-semibold text-gray-500 ${font.isSerif ? 'font-serif' : font.isMonospace ? 'font-mono' : ''}`}>Aa</Text>
+                            </View>
+                            <Text className={`text-[10px] font-bold text-center ${isSelected ? 'text-blue-600' : 'text-gray-700'}`} numberOfLines={1}>{font.name}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  <View className="flex-row justify-between mt-8 gap-4">
+                    <TouchableOpacity onPress={() => setActiveTab('ADD')} className="border border-gray-200 px-6 py-4 rounded-2xl flex-row items-center justify-center bg-white flex-1">
                       <Ionicons name="arrow-back" size={16} color="#4B5563" style={{ marginRight: 6 }} /><Text className="text-gray-600 font-bold text-sm">Back</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setActiveMode('preview')} className="bg-[#10B981] px-6 py-4 rounded-2xl flex-row items-center justify-center flex-1" style={styles.previewModeShadow}>

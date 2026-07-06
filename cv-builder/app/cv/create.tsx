@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert, Image, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert, Image, StyleSheet, ActivityIndicator, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
 
 // --- Type Definitions ---
 type PersonalInfo = { fullName: string; jobTitle: string; email: string; phone: string; address: string; linkedin: string; github: string; };
@@ -70,6 +71,11 @@ export default function CreateCVScreen() {
   const [marginSize, setMarginSize] = useState<'compact' | 'normal' | 'loose'>('normal');
   const [typographySize, setTypographySize] = useState<'small' | 'medium' | 'large'>('medium');
   const [documentFont, setDocumentFont] = useState('Inter');
+
+  // --- AI Summary State ---
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [customApiKey, setCustomApiKey] = useState('');
 
   // --- Handlers for Photo Picker ---
   const pickImage = async () => {
@@ -231,6 +237,83 @@ export default function CreateCVScreen() {
   };
   const removeCustomSectionItem = (id: string) => {
     setCustomSectionItems(customSectionItems.filter(item => item.id !== id));
+  };
+
+  // --- AI Summary Generator Handler ---
+  const generateSummaryWithAI = async (providedKey?: string) => {
+    const apiKey = providedKey || customApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      setShowApiKeyModal(true);
+      return;
+    }
+
+    try {
+      setIsGeneratingSummary(true);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const jobTitlePrompt = personalInfo.jobTitle ? `- Job Title: ${personalInfo.jobTitle}` : '';
+      const skillsPrompt = skills.length > 0 ? `- Skills: ${skills.join(', ')}` : '';
+      const expPrompt = experiences.length > 0 
+        ? `- Experience: ${experiences.map(exp => `${exp.jobTitle} at ${exp.company} (${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}): ${exp.description}`).join('; ')}`
+        : '';
+      const eduPrompt = educations.length > 0
+        ? `- Education: ${educations.map(edu => `${edu.degree} from ${edu.school}`).join('; ')}`
+        : '';
+
+      const prompt = `You are a professional resume writer. Write a compelling, high-impact, and professional profile summary for a resume/CV. 
+It must be 3 to 4 sentences long (about 50-70 words). 
+Focus on matching the experiences, skills, and education details below to write a tailored summary.
+
+Candidate Details:
+${jobTitlePrompt}
+${skillsPrompt}
+${expPrompt}
+${eduPrompt}
+
+Writing Rules:
+1. Write in a professional third-person perspective (or first-person implied: no "I" or "my" or "we").
+2. Focus on key strengths, achievements, and career value.
+3. Return ONLY the plain text summary.
+4. Do NOT include markdown styling, bold text, introductory remarks (e.g. "Here is your summary:"), or quotes.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!generatedText) {
+        throw new Error('No summary text was returned from the API.');
+      }
+
+      const cleanedText = generatedText.replace(/\*\*/g, '').replace(/"/g, '').trim();
+      setSummary(cleanedText);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error: any) {
+      console.error('Gemini API Error:', error);
+      Alert.alert(
+        'Generation Failed',
+        'Could not generate summary. Please check your network connection and verify your Gemini API key is active and correct.'
+      );
+    } finally {
+      setIsGeneratingSummary(false);
+    }
   };
 
   // --- HTML Template Generation (Supports 10 Visually Distinct Formats) ---
@@ -2230,9 +2313,25 @@ export default function CreateCVScreen() {
                 <View className="pb-10">
                   <Text className="text-3xl font-extrabold text-gray-900 mb-6">Professional Summary</Text>
                   <View className="mb-4">
-                    <Text className="text-xs font-extrabold text-gray-500 mb-3 tracking-wide uppercase">
-                      Write a short summary about your professional background and goals.
-                    </Text>
+                    <View className="flex-row justify-between items-center mb-3">
+                      <Text className="text-xs font-extrabold text-gray-500 tracking-wide uppercase flex-1 mr-2">
+                        Write a short summary about your professional background and goals.
+                      </Text>
+                      <TouchableOpacity 
+                        onPress={() => generateSummaryWithAI()}
+                        disabled={isGeneratingSummary}
+                        className={`flex-row items-center px-4 py-2.5 rounded-2xl bg-blue-50 border border-blue-100 ${isGeneratingSummary ? 'opacity-60' : ''}`}
+                      >
+                        {isGeneratingSummary ? (
+                          <ActivityIndicator size="small" color="#2563EB" style={{ marginRight: 6 }} />
+                        ) : (
+                          <Ionicons name="sparkles-outline" size={14} color="#2563EB" style={{ marginRight: 6 }} />
+                        )}
+                        <Text className="text-blue-600 font-bold text-xs">
+                          {isGeneratingSummary ? 'Generating...' : 'Generate with AI'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                     <TextInput 
                       className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium min-h-[160px]" 
                       placeholder="Experienced software engineer with a passion for building scalable web applications..." 
@@ -3121,6 +3220,62 @@ export default function CreateCVScreen() {
             {renderLivePreview()}
           </ScrollView>
         )}
+      {/* GEMINI API KEY INPUT MODAL */}
+      <Modal
+        visible={showApiKeyModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowApiKeyModal(false)}
+      >
+        <View className="flex-1 bg-black/60 items-center justify-center p-6">
+          <View className="bg-white rounded-3xl p-6 w-full max-w-sm border border-gray-100 shadow-xl">
+            <View className="flex-row items-center gap-2.5 mb-4">
+              <View className="w-9 h-9 rounded-xl bg-blue-50 items-center justify-center">
+                <Ionicons name="key-outline" size={18} color="#2563EB" />
+              </View>
+              <Text className="text-base font-bold text-gray-900">Enter Gemini API Key</Text>
+            </View>
+
+            <Text className="text-xs text-gray-500 mb-4 leading-normal">
+              A Google Gemini API Key is required to generate summaries. You can get a free API Key from the Google AI Studio website.
+            </Text>
+
+            <TextInput
+              className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-900 font-mono mb-4 w-full"
+              placeholder="AIzaSy..."
+              placeholderTextColor="#A3A3A3"
+              value={customApiKey}
+              onChangeText={setCustomApiKey}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => setShowApiKeyModal(false)}
+                className="flex-1 py-3 border border-gray-200 rounded-2xl items-center bg-white"
+              >
+                <Text className="text-gray-500 font-bold text-sm">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  if (customApiKey.trim()) {
+                    setShowApiKeyModal(false);
+                    generateSummaryWithAI(customApiKey.trim());
+                  } else {
+                    Alert.alert('Key Required', 'Please enter a valid Gemini API key.');
+                  }
+                }}
+                className="flex-1 py-3 bg-[#2563EB] rounded-2xl items-center"
+              >
+                <Text className="text-white font-bold text-sm">Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

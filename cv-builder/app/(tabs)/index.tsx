@@ -6,6 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,164 +48,153 @@ export default function HomeScreen() {
 
   const handleLogout = async () => {
     try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       await signOut(auth);
     } catch {
       Alert.alert('Error', 'Failed to log out. Please try again.');
     }
   };
 
+  const navigateToCreate = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push('/cv/select-template');
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      {/* Personalized Header Row */}
-      <View className="px-6 py-4 flex-row justify-between items-center bg-white border-b border-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-50/50" edges={['top']}>
+      {/* Personalized Floating Header Card */}
+      <View className="px-6 py-4 flex-row justify-between items-center bg-white border-b border-gray-100 shadow-sm shadow-slate-100/50">
         <View className="flex-row items-center">
           <View 
-            className="w-10 h-10 bg-blue-500 rounded-full items-center justify-center"
+            className="w-11 h-11 bg-blue-500 rounded-2xl items-center justify-center shadow-md shadow-blue-500/20"
             style={styles.avatarShadow}
           >
-            <Text className="text-white text-base font-bold">
+            <Text className="text-white text-base font-black">
               {userName ? userName.charAt(0).toUpperCase() : 'U'}
             </Text>
           </View>
           <View className="ml-3">
-            <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">Welcome back,</Text>
-            <Text className="text-base font-extrabold text-gray-800">{userName || 'User'}</Text>
+            <Text className="text-gray-400 text-[9px] font-bold uppercase tracking-widest leading-none">Welcome Back</Text>
+            <Text className="text-base font-black text-gray-800 mt-1 leading-none">{userName || 'User'}</Text>
           </View>
         </View>
 
         <TouchableOpacity 
           onPress={handleLogout}
-          className="w-9 h-9 bg-gray-50 rounded-full items-center justify-center border border-gray-150"
+          className="w-9 h-9 bg-red-50/60 rounded-xl items-center justify-center border border-red-100/40"
         >
           <Ionicons name="log-out-outline" size={16} color="#ef4444" />
         </TouchableOpacity>
       </View>
 
       <ScrollView 
-        className="flex-1 bg-white" 
+        className="flex-1" 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 32 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 28 }}
       >
         <View className="items-center">
           
-          {/* Live Pulsing Badge */}
-          <View className="bg-slate-50 border border-slate-200/80 rounded-full px-4 py-1.5 flex-row items-center mb-8">
+          {/* Live Pulsing Badge Tag */}
+          <View className="bg-emerald-50/80 border border-emerald-100/60 rounded-full px-4.5 py-1.5 flex-row items-center mb-6 shadow-sm shadow-emerald-500/5">
             <View className="w-2 h-2 bg-emerald-500 rounded-full mr-2" style={styles.pulseDot} />
-            <Text className="text-slate-600 text-xs font-bold">
-              <Text className="text-slate-900 font-extrabold">49,398</Text> resumes created today
+            <Text className="text-emerald-800 text-[11px] font-bold">
+              <Text className="text-emerald-950 font-black">49,398</Text> resumes created today
             </Text>
           </View>
 
           {/* Headline */}
-          <Text className="text-[34px] font-black text-[#1e293b] text-center tracking-tight leading-[42px] mb-4">
+          <Text className="text-[30px] font-black text-[#1e293b] text-center tracking-tight leading-[38px] mb-3">
             Create your CV with an{'\n'}
-            <Text className="text-[#00aaff]">AI-powered CV maker</Text>
+            <Text className="text-[#2563EB]">AI-powered CV maker</Text>
           </Text>
 
           {/* Subheading */}
-          <Text className="text-gray-400 text-center text-sm leading-relaxed max-w-[320px] mb-10">
-            The first step to a better job? A better CV. Only 2% of CVs win interviews, and yours will be one of them. Build it now!
+          <Text className="text-gray-400 text-center text-xs leading-relaxed max-w-[290px] mb-8">
+            The first step to a better job? A better CV. Build and download recruiter-approved layouts instantly.
           </Text>
 
           {/* CTA Action Buttons */}
-          <View className="w-full max-w-[280px] space-y-4 gap-4 mb-14">
+          <View className="w-full max-w-[280px] space-y-3.5 gap-3.5 mb-10">
             <TouchableOpacity 
-              onPress={() => router.push('/cv/select-template')}
-              className="w-full bg-[#0095ff] rounded-2xl py-4 flex-row items-center justify-center"
-              style={{
-                shadowColor: '#0095ff',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.25,
-                shadowRadius: 12,
-                elevation: 6,
-              }}
+              onPress={navigateToCreate}
+              className="w-full bg-[#2563EB] rounded-2xl py-4 flex-row items-center justify-center shadow-lg shadow-blue-500/25"
+              style={styles.mainCtaShadow}
             >
-              <Text className="text-white font-bold text-base">Create My CV Now</Text>
-              <Ionicons name="arrow-forward" size={18} color="white" style={{ marginLeft: 8 }} />
+              <Text className="text-white font-extrabold text-sm uppercase tracking-wider">Create My CV Now</Text>
+              <Ionicons name="arrow-forward" size={16} color="white" style={{ marginLeft: 6 }} />
             </TouchableOpacity>
 
             <TouchableOpacity 
-              onPress={() => router.push('/cv/select-template')}
-              className="w-full bg-white border border-gray-250 rounded-2xl py-4 items-center justify-center"
+              onPress={navigateToCreate}
+              className="w-full bg-white border border-gray-200 rounded-2xl py-4 items-center justify-center"
               style={styles.pillShadow}
             >
-              <Text className="text-[#1e293b] font-bold text-base">View Templates</Text>
+              <Text className="text-gray-700 font-extrabold text-sm uppercase tracking-wider">View Templates</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Double Stats Grid Section */}
-          <View className="w-full flex-row justify-between gap-4 mb-14 border-t border-b border-gray-100 py-6">
-            <View className="flex-1 items-center">
+          {/* Double Stats Cards Section */}
+          <View className="w-full flex-row justify-between gap-4 mb-10">
+            <View className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm shadow-slate-100/50">
               <View className="flex-row items-center mb-1">
-                <Text className="text-2xl font-black text-[#10b981]">48%</Text>
-                <Ionicons name="trending-up" size={18} color="#10b981" style={{ marginLeft: 4 }} />
+                <Text className="text-2xl font-black text-emerald-600">48%</Text>
+                <Ionicons name="trending-up" size={16} color="#10b981" style={{ marginLeft: 4 }} />
               </View>
-              <Text className="text-gray-400 text-[11px] font-semibold text-center leading-tight">
+              <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-wider leading-tight">
                 more likely to get hired
               </Text>
             </View>
 
-            <View className="w-[1px] bg-gray-200 h-10 self-center" />
-
-            <View className="flex-1 items-center">
+            <View className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 shadow-sm shadow-slate-100/50">
               <View className="flex-row items-center mb-1">
-                <Text className="text-2xl font-black text-[#f59e0b]">12%</Text>
-                <Ionicons name="trending-up" size={18} color="#f59e0b" style={{ marginLeft: 4 }} />
+                <Text className="text-2xl font-black text-blue-600">12%</Text>
+                <Ionicons name="cash-outline" size={16} color="#2563eb" style={{ marginLeft: 4 }} />
               </View>
-              <Text className="text-gray-400 text-[11px] font-semibold text-center leading-tight">
+              <Text className="text-gray-400 text-[10px] font-bold uppercase tracking-wider leading-tight">
                 better pay in next role
               </Text>
             </View>
           </View>
 
           {/* 3-Step Guide Section */}
-          <View className="w-full text-left">
-            <Text className="text-xl font-extrabold text-slate-800 text-center mb-8">
-              Create your job-winning CV in{'\n'}
-              <Text className="text-[#00aaff]">3 simple steps</Text>
+          <View className="w-full text-left bg-white border border-gray-100 rounded-[32px] p-6 shadow-sm shadow-slate-100/50 mb-4">
+            <Text className="text-lg font-black text-slate-800 text-center mb-8">
+              Create your CV in{'\n'}
+              <Text className="text-[#2563EB]">3 simple steps</Text>
             </Text>
 
-            <View className="space-y-6 gap-6">
+            <View className="space-y-6 gap-6 pl-2 relative border-l border-gray-150 ml-3.5">
               {/* Step 1 */}
-              <View className="flex-row items-start bg-slate-50 border border-slate-100 rounded-3xl p-5">
-                <View className="w-10 h-10 bg-blue-100 rounded-2xl items-center justify-center shrink-0">
-                  <Ionicons name="folder-open-outline" size={20} color="#2563eb" />
+              <View className="relative pl-6">
+                <View className="absolute w-8 h-8 rounded-full bg-blue-500 items-center justify-center -left-[23px] top-0 shadow-md shadow-blue-500/15">
+                  <Text className="text-white font-extrabold text-[10px]">01</Text>
                 </View>
-                <View className="ml-4 flex-1">
-                  <Text className="text-gray-400 text-[9px] font-bold tracking-widest uppercase">STEP 1</Text>
-                  <Text className="text-slate-800 font-extrabold text-base mt-0.5 mb-1.5">Choose a stylish template</Text>
-                  <Text className="text-slate-550 text-xs leading-relaxed">
-                    Select one of the recruiter-approved CV templates designed specifically to always make it past the screening stage.
-                  </Text>
-                </View>
+                <Text className="text-slate-850 font-extrabold text-[15px] mb-1">Choose a style template</Text>
+                <Text className="text-gray-400 text-xs leading-relaxed">
+                  Select one of our recruiter-approved templates, designed specifically to pass through ATS filters and win interviews.
+                </Text>
               </View>
 
               {/* Step 2 */}
-              <View className="flex-row items-start bg-slate-50 border border-slate-100 rounded-3xl p-5">
-                <View className="w-10 h-10 bg-amber-100 rounded-2xl items-center justify-center shrink-0">
-                  <Ionicons name="create-outline" size={20} color="#d97706" />
+              <View className="relative pl-6">
+                <View className="absolute w-8 h-8 rounded-full bg-amber-500 items-center justify-center -left-[23px] top-0 shadow-md shadow-amber-500/15">
+                  <Text className="text-white font-extrabold text-[10px]">02</Text>
                 </View>
-                <View className="ml-4 flex-1">
-                  <Text className="text-gray-400 text-[9px] font-bold tracking-widest uppercase">STEP 2</Text>
-                  <Text className="text-slate-800 font-extrabold text-base mt-0.5 mb-1.5">Customize each CV section</Text>
-                  <Text className="text-slate-550 text-xs leading-relaxed">
-                    {"Add details about your experience, education, and skills with one click. Need more sections? We've got plenty."}
-                  </Text>
-                </View>
+                <Text className="text-slate-850 font-extrabold text-[15px] mb-1">Customize each CV section</Text>
+                <Text className="text-gray-400 text-xs leading-relaxed">
+                  Add details about your experience, education, and skills. Customize accent colors, margins, and section orders.
+                </Text>
               </View>
 
               {/* Step 3 */}
-              <View className="flex-row items-start bg-slate-50 border border-slate-100 rounded-3xl p-5">
-                <View className="w-10 h-10 bg-emerald-100 rounded-2xl items-center justify-center shrink-0">
-                  <Ionicons name="cloud-download-outline" size={20} color="#059669" />
+              <View className="relative pl-6">
+                <View className="absolute w-8 h-8 rounded-full bg-emerald-500 items-center justify-center -left-[23px] top-0 shadow-md shadow-emerald-500/15">
+                  <Text className="text-white font-extrabold text-[10px]">03</Text>
                 </View>
-                <View className="ml-4 flex-1">
-                  <Text className="text-gray-400 text-[9px] font-bold tracking-widest uppercase">STEP 3</Text>
-                  <Text className="text-slate-800 font-extrabold text-base mt-0.5 mb-1.5">Download your CV in seconds</Text>
-                  <Text className="text-slate-550 text-xs leading-relaxed">
-                    {"You've saved hours on CV creation—now use that extra time to prepare for your interview."}
-                  </Text>
-                </View>
+                <Text className="text-slate-850 font-extrabold text-[15px] mb-1">Download in seconds</Text>
+                <Text className="text-gray-400 text-xs leading-relaxed">
+                  Export your completed CV as a high-fidelity PDF document immediately and start applying for dream career opportunities.
+                </Text>
               </View>
             </View>
           </View>
@@ -217,7 +207,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   avatarShadow: {
-    shadowColor: '#3B82F6',
+    shadowColor: '#2563eb',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.15,
     shadowRadius: 5,
@@ -225,9 +215,9 @@ const styles = StyleSheet.create({
   },
   pillShadow: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: 4,
     elevation: 1,
   },
   pulseDot: {
@@ -236,5 +226,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 4,
     elevation: 2,
+  },
+  mainCtaShadow: {
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 4,
   },
 });

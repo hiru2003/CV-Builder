@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -105,13 +105,43 @@ const TEMPLATES = [
     atsApproved: false,
     tag: 'PREMIUM',
   },
-] as const;
+  {
+    id: 'jonathan',
+    name: 'Jonathan Patterson',
+    description: 'A modern, premium template with a slate-100 left sidebar, clean circular skill bullets, and a professional right column layout.',
+    color: '#005FA3',
+    category: 'Creative',
+    atsApproved: false,
+    tag: 'PREMIUM',
+    image: require('../../templates/jonathan.png'),
+  },
+  {
+    id: 'mariana',
+    name: 'Mariana Signature',
+    description: 'Elegantly styled template featuring a full theme-colored left column with white contact badges and list items.',
+    color: '#2E3A4B',
+    category: 'Creative',
+    atsApproved: false,
+    tag: 'PREMIUM',
+    image: require('../../templates/mariana.png'),
+  },
+  {
+    id: 'richard',
+    name: 'Richard Sterling',
+    description: 'Prestige split-weight typography template with bold-light name heading, full colored sidebar, and modern experience timeline.',
+    color: '#0F2E4A',
+    category: 'Creative',
+    atsApproved: false,
+    tag: 'PREMIUM',
+    image: require('../../templates/richard.png'),
+  },
+] as any;
 
 export default function SelectTemplateScreen() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<CategoryType>('All Styles');
 
-  const filteredTemplates = TEMPLATES.filter((tmpl) => {
+  const filteredTemplates = TEMPLATES.filter((tmpl: any) => {
     if (activeCategory === 'All Styles') return true;
     if (activeCategory === 'Modern') return tmpl.category === 'Modern';
     return tmpl.category === activeCategory;
@@ -424,7 +454,7 @@ export default function SelectTemplateScreen() {
 
         {/* Templates list cards */}
         <View className="space-y-6 gap-6">
-          {filteredTemplates.map((tmpl) => (
+          {filteredTemplates.map((tmpl: any) => (
             <TouchableOpacity 
               key={tmpl.id} 
               onPress={() => router.push({ pathname: '/cv/create', params: { template: tmpl.id } })}
@@ -446,10 +476,16 @@ export default function SelectTemplateScreen() {
                   </Text>
                 </View>
 
-                {/* Render style-matching complete mini resume */}
-                <View className="bg-white border border-gray-200/60 rounded-xl min-h-[140px] shadow-sm overflow-hidden items-stretch">
-                  {renderMiniatureResume(tmpl.id, tmpl.color)}
-                </View>
+                {/* Render style-matching complete mini resume or mockup image */}
+                {tmpl.image ? (
+                  <View className="bg-white border border-gray-200/60 rounded-xl h-[220px] shadow-sm overflow-hidden items-stretch">
+                    <Image source={tmpl.image} className="w-full h-full" resizeMode="cover" />
+                  </View>
+                ) : (
+                  <View className="bg-white border border-gray-200/60 rounded-xl min-h-[140px] shadow-sm overflow-hidden items-stretch">
+                    {renderMiniatureResume(tmpl.id, tmpl.color)}
+                  </View>
+                )}
               </View>
 
               {/* Template Meta (Matching Vercel screen details layout) */}

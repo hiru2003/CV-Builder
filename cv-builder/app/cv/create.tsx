@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert, Image, StyleSheet, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert, Image, StyleSheet, ActivityIndicator, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
@@ -1150,7 +1151,287 @@ Writing Rules:
       `;
     }
 
-    // 10. MODERN SPLIT (Non-ATS)
+    // 10. JONATHAN PATTERSON (Non-ATS)
+    if (template === 'jonathan') {
+      const skillsListHTML = skills.map(s => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: #334155; font-weight: bold; display: flex; align-items: center;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid ${accentColor}; vertical-align: middle; margin-right: 8px; position: relative;">
+            <span style="display: block; width: 4px; height: 4px; border-radius: 50%; background-color: ${accentColor}; position: absolute; top: 2px; left: 2px;"></span>
+          </span>
+          ${s}
+        </div>
+      `).join('');
+
+      const langListHTML = languages.map(l => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: #334155; font-weight: bold; display: flex; align-items: center;">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid ${accentColor}; vertical-align: middle; margin-right: 8px; position: relative;">
+            <span style="display: block; width: 4px; height: 4px; border-radius: 50%; background-color: ${accentColor}; position: absolute; top: 2px; left: 2px;"></span>
+          </span>
+          ${l.name} <span style="font-weight: normal; color: #64748b; font-size: 9.5px; margin-left: 4px;">(${l.level})</span>
+        </div>
+      `).join('');
+
+      const eduListHTML = educations.map(edu => `
+        <div style="position: relative; padding-left: 14px; border-left: 1px solid #cbd5e1; margin-bottom: 14px;">
+          <div style="position: absolute; width: 6px; height: 6px; border-radius: 50%; background-color: ${accentColor}; left: -4px; top: 4px;"></div>
+          <div style="font-weight: bold; font-size: 9.5px; color: #1e293b;">${edu.startDate} - ${edu.endDate || 'Present'}</div>
+          <div style="font-weight: bold; font-size: 10.5px; color: #334155; margin-top: 2px;">${edu.school}</div>
+          <div style="font-size: 9.5px; color: #64748b; font-style: italic; margin-top: 1px;">${edu.degree} in ${edu.fieldOfStudy}</div>
+        </div>
+      `).join('');
+
+      const expListHTML = experiences.map(exp => `
+        <div style="position: relative; padding-left: 18px; border-left: 1.5px solid ${accentColor}; margin-bottom: 18px;">
+          <div style="position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: ${accentColor}; border: 1.5px solid white; left: -5px; top: 4px; box-shadow: 0 0 0 1px ${accentColor};"></div>
+          <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; color: #1e293b;">
+            <span>${exp.jobTitle}</span>
+            <span style="font-size: 10px; color: #64748b; font-weight: normal;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</span>
+          </div>
+          <div style="font-weight: bold; font-size: 10.5px; color: #64748b; margin-top: 2px; margin-bottom: 6px;">${exp.company} ${exp.location ? `• ${exp.location}` : ''}</div>
+          <div style="font-size: 11px; color: #475569; text-align: justify; line-height: 1.5;">${exp.description}</div>
+        </div>
+      `).join('');
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; margin: 0; padding: 0; font-size: 11.5px; }
+            .wrapper { display: table; width: 100%; min-height: 100vh; }
+            .sidebar { display: table-cell; width: 35%; background-color: #f1f5f9; padding: 35px 20px; vertical-align: top; }
+            .main { display: table-cell; width: 65%; padding: 35px 25px; vertical-align: top; background-color: #ffffff; }
+            .profile-photo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid ${accentColor}; margin-bottom: 25px; object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+            .section-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: ${accentColor}; border-bottom: 1.5px solid ${accentColor}; padding-bottom: 4px; margin-top: 25px; margin-bottom: 12px; }
+            .contact-item { margin-bottom: 8px; font-size: 10.5px; color: #475569; display: flex; align-items: center; }
+            .contact-icon { color: ${accentColor}; margin-right: 8px; font-size: 12px; }
+          </style>
+          ${globalStylesOverride}
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="sidebar">
+              <div style="text-align: center;">
+                ${photoHTML ? photoHTML.replace('class="profile-photo"', `class="profile-photo" style="border-color: ${accentColor};"`) : ''}
+              </div>
+              <div class="section-title">Contact</div>
+              <div style="margin-top: 8px;">
+                ${personalInfo.phone ? `<div class="contact-item"><span class="contact-icon">📞</span>${personalInfo.phone}</div>` : ''}
+                ${personalInfo.email ? `<div class="contact-item"><span class="contact-icon">✉</span>${personalInfo.email}</div>` : ''}
+                ${personalInfo.address ? `<div class="contact-item"><span class="contact-icon">📍</span>${personalInfo.address}</div>` : ''}
+                ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-icon">🌐</span>${personalInfo.linkedin}</div>` : ''}
+              </div>
+              ${skills.length > 0 ? `<div class="section-title">Skills</div><div style="margin-top: 8px;">${skillsListHTML}</div>` : ''}
+              ${showLanguages && languages.length > 0 ? `<div class="section-title">Languages</div><div style="margin-top: 8px;">${langListHTML}</div>` : ''}
+              ${educations.length > 0 ? `<div class="section-title">Education</div><div style="margin-top: 10px;">${eduListHTML}</div>` : ''}
+            </div>
+            <div class="main">
+              <div style="margin-bottom: 25px;">
+                <h1 style="font-size: 28px; font-weight: bold; text-transform: uppercase; color: ${accentColor}; margin: 0 0 4px 0; letter-spacing: 0.5px;">${personalInfo.fullName || 'Your Name'}</h1>
+                <p style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin: 0;">${personalInfo.jobTitle || 'Professional Title'}</p>
+                <div style="width: 40px; height: 3px; background-color: ${accentColor}; margin-top: 12px;"></div>
+              </div>
+              ${summary ? `<div style="margin-bottom: 25px;"><div class="section-title" style="margin-top: 0;">Personal Profile</div><div style="text-align: justify; line-height: 1.6; color: #475569;">${summary}</div></div>` : ''}
+              ${experiences.length > 0 ? `<div style="margin-bottom: 25px;"><div class="section-title">Work Experience</div><div style="margin-top: 15px;">${expListHTML}</div></div>` : ''}
+              ${renderCertificationsHTML(false)}
+              ${renderAwardsHTML()}
+              ${renderReferencesHTML()}
+              ${renderCustomSectionHTML(false)}
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    // 11. MARIANA SIGNATURE (Non-ATS)
+    if (template === 'mariana') {
+      const skillsListHTML = skills.map(s => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.9);">
+          • ${s}
+        </div>
+      `).join('');
+
+      const langListHTML = languages.map(l => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.9); display: flex; justify-content: space-between;">
+          <span style="font-weight: bold; color: white;">${l.name}</span>
+          <span style="color: rgba(255, 255, 255, 0.7); font-size: 10px;">${l.level}</span>
+        </div>
+      `).join('');
+
+      const eduListHTML = educations.map(edu => `
+        <div style="margin-bottom: 12px; color: rgba(255, 255, 255, 0.9); line-height: 1.4;">
+          <div style="font-size: 9px; color: rgba(255, 255, 255, 0.6); font-weight: bold;">${edu.startDate} - ${edu.endDate || 'Present'}</div>
+          <div style="font-weight: bold; color: white; font-size: 11px;">${edu.degree} in ${edu.fieldOfStudy}</div>
+          <div style="font-size: 10px; color: rgba(255, 255, 255, 0.85);">${edu.school}</div>
+        </div>
+      `).join('');
+
+      const expListHTML = experiences.map(exp => `
+        <div style="position: relative; padding-left: 18px; border-left: 1px solid #cbd5e1; margin-bottom: 18px;">
+          <div style="position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: #ffffff; border: 1.5px solid #475569; left: -5px; top: 4px;"></div>
+          <div style="font-size: 10px; color: #94a3b8; font-weight: bold; margin-bottom: 2px;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</div>
+          <div style="font-weight: bold; font-size: 12px; color: #1e293b;">${exp.company} ${exp.location ? `• ${exp.location}` : ''}</div>
+          <div style="font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-top: 2px; margin-bottom: 6px;">${exp.jobTitle}</div>
+          <div style="font-size: 11px; color: #64748b; line-height: 1.5; text-align: justify;">${exp.description}</div>
+        </div>
+      `).join('');
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; margin: 0; padding: 0; font-size: 11.5px; }
+            .wrapper { display: table; width: 100%; min-height: 100vh; }
+            .sidebar { display: table-cell; width: 35%; background-color: ${accentColor}; padding: 35px 20px; vertical-align: top; color: #f8fafc; }
+            .main { display: table-cell; width: 65%; padding: 35px 25px; vertical-align: top; background-color: #ffffff; }
+            .profile-photo { width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255, 255, 255, 0.2); margin-bottom: 25px; object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+            .sidebar-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; color: #ffffff; border-bottom: 1px solid rgba(255, 255, 255, 0.25); padding-bottom: 5px; margin-top: 25px; margin-bottom: 12px; }
+            .main-title { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #1e293b; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; }
+            .contact-item { margin-bottom: 10px; font-size: 10.5px; }
+            .contact-label { font-weight: bold; color: white; display: block; margin-bottom: 2px; font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.7); }
+          </style>
+          ${globalStylesOverride}
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="sidebar">
+              <div style="text-align: center;">
+                ${photoHTML ? photoHTML.replace('class="profile-photo"', `class="profile-photo" style="border-color: rgba(255, 255, 255, 0.2);"`) : ''}
+              </div>
+              <div class="sidebar-title">Contact</div>
+              <div style="margin-top: 8px;">
+                ${personalInfo.phone ? `<div class="contact-item"><span class="contact-label">Phone</span>${personalInfo.phone}</div>` : ''}
+                ${personalInfo.email ? `<div class="contact-item"><span class="contact-label">Email</span>${personalInfo.email}</div>` : ''}
+                ${personalInfo.address ? `<div class="contact-item"><span class="contact-label">Address</span>${personalInfo.address}</div>` : ''}
+              </div>
+              ${educations.length > 0 ? `<div class="sidebar-title">Education</div><div style="margin-top: 10px;">${eduListHTML}</div>` : ''}
+              ${skills.length > 0 ? `<div class="sidebar-title">Expertise</div><div style="margin-top: 8px;">${skillsListHTML}</div>` : ''}
+              ${showLanguages && languages.length > 0 ? `<div class="sidebar-title">Language</div><div style="margin-top: 8px;">${langListHTML}</div>` : ''}
+            </div>
+            <div class="main">
+              <div style="margin-bottom: 25px;">
+                <h1 style="font-size: 32px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0; letter-spacing: -0.5px;">${personalInfo.fullName || 'Your Name'}</h1>
+                <p style="font-size: 14px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 15px 0;">${personalInfo.jobTitle || 'Professional Title'}</p>
+                ${summary ? `<div style="font-size: 11px; color: #475569; line-height: 1.6; text-align: justify;">${summary}</div>` : ''}
+              </div>
+              ${experiences.length > 0 ? `<div style="margin-bottom: 25px;"><div class="main-title" style="margin-top: 0;">Experience</div><div style="margin-top: 15px;">${expListHTML}</div></div>` : ''}
+              ${renderCertificationsHTML(false)}
+              ${renderAwardsHTML()}
+              ${renderReferencesHTML()}
+              ${renderCustomSectionHTML(false)}
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    // 12. RICHARD STERLING (Non-ATS)
+    if (template === 'richard') {
+      const getSplitName = (fullName: string) => {
+        const trimmed = fullName.trim();
+        if (!trimmed) return { first: 'YOUR', last: 'NAME' };
+        const parts = trimmed.split(' ');
+        if (parts.length === 1) return { first: parts[0], last: '' };
+        return {
+          first: parts[0],
+          last: parts.slice(1).join(' ')
+        };
+      };
+      const nameParts = getSplitName(personalInfo.fullName);
+
+      const skillsListHTML = skills.map(s => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.9);">
+          • ${s}
+        </div>
+      `).join('');
+
+      const langListHTML = languages.map(l => `
+        <div style="margin-bottom: 6px; font-size: 11px; color: rgba(255, 255, 255, 0.9);">
+          • <span style="font-weight: bold; color: white;">${l.name}</span> (${l.level})
+        </div>
+      `).join('');
+
+      const eduListHTML = educations.map(edu => `
+        <div style="position: relative; padding-left: 12px; border-left: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 12px; color: rgba(255, 255, 255, 0.9);">
+          <div style="position: absolute; width: 6px; height: 6px; border-radius: 50%; background-color: #ffffff; left: -4.5px; top: 4px;"></div>
+          <div style="font-size: 8.5px; color: rgba(255, 255, 255, 0.7); font-weight: bold;">${edu.startDate} - ${edu.endDate || 'Present'}</div>
+          <div style="font-weight: bold; color: white; font-size: 10px; text-transform: uppercase; margin-top: 2px;">${edu.school}</div>
+          <div style="font-size: 9px; color: rgba(255, 255, 255, 0.85); font-style: italic; margin-top: 1px;">${edu.degree} in ${edu.fieldOfStudy}</div>
+        </div>
+      `).join('');
+
+      const expListHTML = experiences.map(exp => `
+        <div style="position: relative; padding-left: 18px; border-left: 1px solid #e2e8f0; margin-bottom: 18px;">
+          <div style="position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: ${accentColor}; border: 1.5px solid white; left: -5px; top: 4px; box-shadow: 0 0 0 1px ${accentColor};"></div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+            <h3 style="font-weight: bold; font-size: 11.5px; color: #1e293b; text-transform: uppercase; margin: 0;">${exp.company}</h3>
+            <span style="font-size: 9.5px; font-weight: bold; color: #94a3b8;">${exp.startDate} - ${exp.current ? 'PRESENT' : exp.endDate}</span>
+          </div>
+          <div style="font-size: 10.5px; font-weight: 600; color: #64748b; font-style: italic; margin-bottom: 6px;">${exp.jobTitle} ${exp.location ? `• ${exp.location}` : ''}</div>
+          <div style="font-size: 11px; color: #475569; line-height: 1.5; text-align: justify;">${exp.description}</div>
+        </div>
+      `).join('');
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; margin: 0; padding: 0; font-size: 11.5px; }
+            .wrapper { display: table; width: 100%; min-height: 100vh; }
+            .sidebar { display: table-cell; width: 35%; background-color: ${accentColor}; padding: 35px 20px; vertical-align: top; color: #f8fafc; }
+            .main { display: table-cell; width: 65%; padding: 35px 25px; vertical-align: top; background-color: #ffffff; }
+            .profile-photo { width: 110px; height: 110px; border-radius: 50%; border: 2px solid #ffffff; margin-bottom: 25px; object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+            .sidebar-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; color: #ffffff; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding-bottom: 5px; margin-top: 25px; margin-bottom: 12px; }
+            .main-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; margin-top: 25px; margin-bottom: 15px; }
+            .contact-item { margin-bottom: 8px; font-size: 10.5px; }
+          </style>
+          ${globalStylesOverride}
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="sidebar">
+              <div style="text-align: center;">
+                ${photoHTML ? photoHTML.replace('class="profile-photo"', `class="profile-photo" style="border-color: #ffffff; border-width: 2px;"`) : ''}
+              </div>
+              <div class="sidebar-title">Contact</div>
+              <div style="margin-top: 8px;">
+                ${personalInfo.phone ? `<div class="contact-item">📞 ${personalInfo.phone}</div>` : ''}
+                ${personalInfo.email ? `<div class="contact-item">✉ ${personalInfo.email}</div>` : ''}
+                ${personalInfo.address ? `<div class="contact-item">📍 ${personalInfo.address}</div>` : ''}
+              </div>
+              ${educations.length > 0 ? `<div class="sidebar-title">Education</div><div style="margin-top: 10px;">${eduListHTML}</div>` : ''}
+              ${skills.length > 0 ? `<div class="sidebar-title">Skills</div><div style="margin-top: 8px;">${skillsListHTML}</div>` : ''}
+              ${showLanguages && languages.length > 0 ? `<div class="sidebar-title">Languages</div><div style="margin-top: 8px;">${langListHTML}</div>` : ''}
+            </div>
+            <div class="main">
+              <div style="margin-bottom: 25px; border-bottom: 1px solid #cbd5e1; padding-bottom: 15px;">
+                <h1 style="font-size: 28px; text-transform: uppercase; margin: 0 0 4px 0; letter-spacing: 0.5px;">
+                  <span style="font-weight: 900; color: #1e293b;">${nameParts.first}</span>
+                  <span style="font-weight: 300; color: #94a3b8;">${nameParts.last}</span>
+                </h1>
+                <p style="font-size: 11px; font-weight: 900; color: ${accentColor}; text-transform: uppercase; letter-spacing: 2.5px; margin: 0;">${personalInfo.jobTitle || 'Professional Title'}</p>
+              </div>
+              ${summary ? `<div style="margin-bottom: 25px;"><div class="main-title" style="margin-top: 0;">Profile</div><div style="text-align: justify; line-height: 1.6; color: #475569;">${summary}</div></div>` : ''}
+              ${experiences.length > 0 ? `<div style="margin-bottom: 25px;"><div class="main-title">Work Experience</div><div style="margin-top: 15px;">${expListHTML}</div></div>` : ''}
+              ${renderCertificationsHTML(false)}
+              ${renderAwardsHTML()}
+              ${renderReferencesHTML()}
+              ${renderCustomSectionHTML(false)}
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    // 13. MODERN SPLIT (Non-ATS)
     return `
       <!DOCTYPE html>
       <html>
@@ -1834,6 +2115,422 @@ Writing Rules:
               ))}
             </View>
           )}
+        </View>
+      );
+    }
+
+    // JONATHAN PATTERSON (Non-ATS)
+    if (template === 'jonathan') {
+      return (
+        <View className="bg-white border border-gray-200 rounded-3xl min-h-[600px] mb-12 flex-row overflow-hidden" style={styles.previewShadow}>
+          {/* Left Sidebar */}
+          <View className="w-[35%] bg-slate-100 p-4 pt-6">
+            {/* Profile Image with outline */}
+            <View className="items-center mb-6">
+              {photoInfo ? (
+                <View className="w-24 h-24 rounded-full overflow-hidden border-4 mx-auto shadow-md" style={{ borderColor: accentColor }}>
+                  <Image source={{ uri: photoInfo.uri }} className="w-full h-full" style={{ resizeMode: 'cover' }} />
+                </View>
+              ) : (
+                <View className="w-24 h-24 rounded-full bg-slate-300 border-4 mx-auto shadow-md items-center justify-center" style={{ borderColor: accentColor }}>
+                  <Text className="text-white text-xl font-bold">{personalInfo.fullName ? personalInfo.fullName.charAt(0).toUpperCase() : 'J'}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Contact */}
+            <View className="mb-5">
+              <Text className="text-[10px] font-black uppercase tracking-widest border-b pb-1 mb-2" style={{ color: accentColor, borderColor: accentColor }}>Contact</Text>
+              <View className="space-y-1.5">
+                {personalInfo.phone ? (
+                  <View className="flex-row items-center">
+                    <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>📞</Text>
+                    <Text className="text-[9px] text-gray-650" style={{ fontFamily: previewFont }}>{personalInfo.phone}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.email ? (
+                  <View className="flex-row items-center">
+                    <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>✉</Text>
+                    <Text className="text-[9px] text-gray-650 break-all flex-1" style={{ fontFamily: previewFont }}>{personalInfo.email}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.address ? (
+                  <View className="flex-row items-center">
+                    <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>📍</Text>
+                    <Text className="text-[9px] text-gray-650" style={{ fontFamily: previewFont }}>{personalInfo.address}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.linkedin ? (
+                  <View className="flex-row items-center">
+                    <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>🌐</Text>
+                    <Text className="text-[9px] text-gray-650 break-all flex-1" style={{ fontFamily: previewFont }}>{personalInfo.linkedin}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+
+            {/* Skills */}
+            {skills.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-black uppercase tracking-widest border-b pb-1 mb-2" style={{ color: accentColor, borderColor: accentColor }}>Skills</Text>
+                {skills.map((s, i) => (
+                  <View key={i} className="flex-row items-center mb-1.5">
+                    <View className="w-2 h-2 rounded-full border items-center justify-center mr-1.5 mt-0.5" style={{ borderColor: accentColor }}>
+                      <View className="w-1 h-1 rounded-full" style={{ backgroundColor: accentColor }} />
+                    </View>
+                    <Text className="text-[9px] text-gray-700 font-bold" style={{ fontFamily: previewFont }}>{s}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Languages */}
+            {showLanguages && languages.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-black uppercase tracking-widest border-b pb-1 mb-2" style={{ color: accentColor, borderColor: accentColor }}>Languages</Text>
+                {languages.map((l) => (
+                  <View key={l.id} className="flex-row items-center mb-1.5">
+                    <View className="w-2 h-2 rounded-full border items-center justify-center mr-1.5 mt-0.5" style={{ borderColor: accentColor }}>
+                      <View className="w-1 h-1 rounded-full" style={{ backgroundColor: accentColor }} />
+                    </View>
+                    <Text className="text-[9px] text-gray-700 font-bold" style={{ fontFamily: previewFont }}>{l.name} ({l.level})</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Education */}
+            {educations.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-black uppercase tracking-widest border-b pb-1 mb-2" style={{ color: accentColor, borderColor: accentColor }}>Education</Text>
+                <View className="border-l border-gray-300 pl-2.5 ml-1 gap-3">
+                  {educations.map((edu) => (
+                    <View key={edu.id} className="relative">
+                      <View className="absolute w-1.5 h-1.5 rounded-full -left-[14.5px] top-1" style={{ backgroundColor: accentColor }} />
+                      <Text className="text-[8px] font-extrabold text-gray-800" style={{ fontFamily: previewFont }}>{edu.startDate} - {edu.endDate}</Text>
+                      <Text className="text-[9px] font-bold text-gray-700 mt-0.5" style={{ fontFamily: previewFont }}>{edu.school}</Text>
+                      <Text className="text-[8.5px] text-gray-500 italic mt-0.5" style={{ fontFamily: previewFont }}>{edu.degree} in {edu.fieldOfStudy}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Right Main Column */}
+          <View className="w-[65%] p-4 pt-6 bg-white">
+            <View className="mb-5">
+              <Text className="text-xl font-bold uppercase" style={{ color: accentColor, fontFamily: previewFont }}>
+                {personalInfo.fullName || 'YOUR NAME'}
+              </Text>
+              {personalInfo.jobTitle ? (
+                <Text className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mt-0.5">
+                  {personalInfo.jobTitle}
+                </Text>
+              ) : null}
+              <View className="w-8 h-[2px] mt-2.5" style={{ backgroundColor: accentColor }} />
+            </View>
+
+            {summary ? (
+              <View className="mb-5">
+                <Text className="text-[10px] font-black uppercase tracking-widest text-gray-800 mb-1" style={{ color: accentColor }}>Profile</Text>
+                <Text className="text-[10.5px] text-gray-650 leading-relaxed text-justify" style={{ fontFamily: previewFont }}>{summary}</Text>
+              </View>
+            ) : null}
+
+            {/* Experience */}
+            {experiences.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-black uppercase tracking-widest text-gray-800 mb-3" style={{ color: accentColor }}>Experience</Text>
+                <View className="border-l border-gray-200 pl-3 ml-1.5 gap-3">
+                  {experiences.map((exp) => (
+                    <View key={exp.id} className="relative">
+                      <View className="absolute w-2 h-2 rounded-full border border-white -left-[17.5px] top-1" style={{ backgroundColor: accentColor }} />
+                      <View className="flex-row justify-between">
+                        <Text className="text-[11px] font-bold text-gray-850" style={{ fontFamily: previewFont }}>{exp.jobTitle}</Text>
+                        <Text className="text-[8.5px] text-gray-400 font-medium">{exp.startDate} - {exp.current ? 'Present' : exp.endDate}</Text>
+                      </View>
+                      <Text className="text-[9.5px] font-semibold text-gray-500 italic mt-0.5">{exp.company} {exp.location ? `• ${exp.location}` : ''}</Text>
+                      {exp.description ? <Text className="text-[10.5px] text-gray-600 mt-1 leading-normal" style={{ fontFamily: previewFont }}>{exp.description}</Text> : null}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {renderCertificationsPreview(accentColor)}
+            {renderAwardsPreview(accentColor)}
+            {renderReferencesPreview(accentColor)}
+            {renderCustomSectionPreview(accentColor)}
+          </View>
+        </View>
+      );
+    }
+
+    // MARIANA SIGNATURE (Non-ATS)
+    if (template === 'mariana') {
+      return (
+        <View className="bg-white border border-gray-200 rounded-3xl min-h-[600px] mb-12 flex-row overflow-hidden" style={styles.previewShadow}>
+          {/* Left Sidebar */}
+          <View className="w-[35%] p-4 pt-6" style={{ backgroundColor: accentColor }}>
+            {/* Profile Image */}
+            <View className="items-center mb-6">
+              {photoInfo ? (
+                <View className="w-24 h-24 rounded-full overflow-hidden border-4 border-white/20 mx-auto shadow-md">
+                  <Image source={{ uri: photoInfo.uri }} className="w-full h-full" style={{ resizeMode: 'cover' }} />
+                </View>
+              ) : (
+                <View className="w-24 h-24 rounded-full bg-white/10 border-4 border-white/20 mx-auto shadow-md items-center justify-center">
+                  <Text className="text-white text-xl font-bold">{personalInfo.fullName ? personalInfo.fullName.charAt(0).toUpperCase() : 'M'}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Contact */}
+            <View className="mb-5">
+              <Text className="text-[10px] font-bold uppercase tracking-widest border-b border-white/25 pb-1 text-white">Contact</Text>
+              <View className="space-y-2 mt-2">
+                {personalInfo.phone ? (
+                  <View>
+                    <Text className="text-[8px] font-bold text-white/70 uppercase">Phone</Text>
+                    <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>{personalInfo.phone}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.email ? (
+                  <View>
+                    <Text className="text-[8px] font-bold text-white/70 uppercase">Email</Text>
+                    <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>{personalInfo.email}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.address ? (
+                  <View>
+                    <Text className="text-[8px] font-bold text-white/70 uppercase">Address</Text>
+                    <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>{personalInfo.address}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+
+            {/* Education */}
+            {educations.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-widest border-b border-white/25 pb-1 text-white">Education</Text>
+                <View className="space-y-2 mt-2">
+                  {educations.map((edu) => (
+                    <View key={edu.id}>
+                      <Text className="text-[8px] text-white/60 font-semibold">{edu.startDate} - {edu.endDate}</Text>
+                      <Text className="text-[9px] font-bold text-white" style={{ fontFamily: previewFont }}>{edu.degree} in {edu.fieldOfStudy}</Text>
+                      <Text className="text-[8.5px] text-white/85" style={{ fontFamily: previewFont }}>{edu.school}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Skills */}
+            {skills.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-widest border-b border-white/25 pb-1 text-white">Expertise</Text>
+                <View className="space-y-1 mt-2">
+                  {skills.map((s, i) => (
+                    <Text key={i} className="text-[9px] text-white" style={{ fontFamily: previewFont }}>• {s}</Text>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Languages */}
+            {showLanguages && languages.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-widest border-b border-white/25 pb-1 text-white">Language</Text>
+                <View className="space-y-1.5 mt-2">
+                  {languages.map((l) => (
+                    <View key={l.id} className="flex-row justify-between items-center">
+                      <Text className="text-[9px] text-white font-bold" style={{ fontFamily: previewFont }}>{l.name}</Text>
+                      <Text className="text-[8px] text-white/70" style={{ fontFamily: previewFont }}>{l.level}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Right Main Column */}
+          <View className="w-[65%] p-4 pt-6 bg-white">
+            <View className="mb-6">
+              <Text className="text-2xl font-extrabold text-gray-900 leading-none" style={{ fontFamily: previewFont }}>
+                {personalInfo.fullName || 'YOUR NAME'}
+              </Text>
+              {personalInfo.jobTitle ? (
+                <Text className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500 mt-1">
+                  {personalInfo.jobTitle}
+                </Text>
+              ) : null}
+            </View>
+
+            {summary ? (
+              <View className="mb-5">
+                <Text className="text-[10.5px] text-gray-655 leading-relaxed text-justify" style={{ fontFamily: previewFont }}>{summary}</Text>
+              </View>
+            ) : null}
+
+            {/* Experience */}
+            {experiences.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[11px] font-bold text-gray-800 tracking-wide uppercase border-b border-gray-200 pb-1 mb-3">Experience</Text>
+                <View className="space-y-3.5">
+                  {experiences.map((exp) => (
+                    <View key={exp.id} className="relative pl-4 border-l border-gray-200">
+                      <View className="absolute w-2 h-2 bg-white border border-gray-500 rounded-full -left-[4.5px] top-1" />
+                      <Text className="text-[8px] font-semibold text-gray-400 mb-0.5">{exp.startDate} - {exp.current ? 'Present' : exp.endDate}</Text>
+                      <Text className="text-[10px] font-bold text-gray-800" style={{ fontFamily: previewFont }}>{exp.company} {exp.location ? `• ${exp.location}` : ''}</Text>
+                      <Text className="text-[9.5px] font-extrabold text-gray-650 uppercase mt-0.5">{exp.jobTitle}</Text>
+                      {exp.description ? <Text className="text-[10.5px] text-gray-600 mt-1 leading-normal" style={{ fontFamily: previewFont }}>{exp.description}</Text> : null}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {renderCertificationsPreview('#1f2937')}
+            {renderAwardsPreview('#1f2937')}
+            {renderReferencesPreview('#1f2937')}
+            {renderCustomSectionPreview('#1f2937')}
+          </View>
+        </View>
+      );
+    }
+
+    // RICHARD STERLING (Non-ATS)
+    if (template === 'richard') {
+      const getSplitName = (fullName: string) => {
+        const trimmed = fullName.trim();
+        if (!trimmed) return { first: 'YOUR', last: 'NAME' };
+        const parts = trimmed.split(' ');
+        if (parts.length === 1) return { first: parts[0], last: '' };
+        return {
+          first: parts[0],
+          last: parts.slice(1).join(' ')
+        };
+      };
+      const nameParts = getSplitName(personalInfo.fullName);
+
+      return (
+        <View className="bg-white border border-gray-200 rounded-3xl min-h-[600px] mb-12 flex-row overflow-hidden" style={styles.previewShadow}>
+          {/* Left Sidebar */}
+          <View className="w-[35%] p-4 pt-6" style={{ backgroundColor: accentColor }}>
+            {/* Profile Image with thin white border */}
+            <View className="items-center mb-6">
+              {photoInfo ? (
+                <View className="w-24 h-24 rounded-full overflow-hidden border-2 border-white mx-auto shadow-md">
+                  <Image source={{ uri: photoInfo.uri }} className="w-full h-full" style={{ resizeMode: 'cover' }} />
+                </View>
+              ) : (
+                <View className="w-24 h-24 rounded-full bg-white/10 border-2 border-white mx-auto shadow-md items-center justify-center">
+                  <Text className="text-white text-xl font-bold">{personalInfo.fullName ? personalInfo.fullName.charAt(0).toUpperCase() : 'R'}</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Contact */}
+            <View className="mb-5">
+              <Text className="text-[10px] font-bold uppercase tracking-wider border-b border-white/20 pb-1.5 text-white">Contact</Text>
+              <View className="space-y-2 mt-2">
+                {personalInfo.phone ? <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>📞 {personalInfo.phone}</Text> : null}
+                {personalInfo.email ? <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>✉ {personalInfo.email}</Text> : null}
+                {personalInfo.address ? <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>📍 {personalInfo.address}</Text> : null}
+              </View>
+            </View>
+
+            {/* Education */}
+            {educations.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-wider border-b border-white/20 pb-1.5 text-white">Education</Text>
+                <View className="space-y-3 mt-2 pl-2 border-l border-white/20">
+                  {educations.map((edu) => (
+                    <View key={edu.id} className="relative">
+                      <View className="absolute w-1.5 h-1.5 rounded-full bg-white -left-[11.5px] top-1" />
+                      <Text className="text-[8px] text-white/70 font-semibold">{edu.startDate} - {edu.endDate}</Text>
+                      <Text className="text-[9px] font-bold text-white uppercase" style={{ fontFamily: previewFont }}>{edu.school}</Text>
+                      <Text className="text-[8.5px] text-white/90 italic" style={{ fontFamily: previewFont }}>{edu.degree} in {edu.fieldOfStudy}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Skills */}
+            {skills.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-wider border-b border-white/20 pb-1.5 text-white">Skills</Text>
+                <View className="space-y-1.5 mt-2">
+                  {skills.map((s, i) => (
+                    <Text key={i} className="text-[9px] text-white" style={{ fontFamily: previewFont }}>• {s}</Text>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Languages */}
+            {showLanguages && languages.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[10px] font-bold uppercase tracking-wider border-b border-white/20 pb-1.5 text-white">Languages</Text>
+                <View className="space-y-1.5 mt-2">
+                  {languages.map((l) => (
+                    <Text key={l.id} className="text-[9px] text-white" style={{ fontFamily: previewFont }}>• {l.name} ({l.level})</Text>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Right Main Column */}
+          <View className="w-[65%] p-4 pt-6 bg-white">
+            <View className="mb-5 pb-2">
+              <Text className="text-2xl uppercase leading-none">
+                <Text className="font-extrabold text-gray-900" style={{ fontFamily: previewFont }}>{nameParts.first}</Text>{' '}
+                <Text className="font-light text-gray-400" style={{ fontFamily: previewFont }}>{nameParts.last}</Text>
+              </Text>
+              {personalInfo.jobTitle ? (
+                <Text className="text-[9px] font-extrabold uppercase tracking-[0.25em] mt-1" style={{ color: accentColor }}>
+                  {personalInfo.jobTitle}
+                </Text>
+              ) : null}
+              <View className="w-8 h-[2px] mt-2.5" style={{ backgroundColor: accentColor }} />
+            </View>
+
+            {summary ? (
+              <View className="mb-5">
+                <Text className="text-[9px] font-black tracking-widest uppercase text-gray-400 mb-1 border-b border-gray-100 pb-0.5">Profile</Text>
+                <Text className="text-[10.5px] text-gray-650 leading-relaxed text-justify" style={{ fontFamily: previewFont }}>{summary}</Text>
+              </View>
+            ) : null}
+
+            {/* Experience */}
+            {experiences.length > 0 && (
+              <View className="mb-5">
+                <Text className="text-[9px] font-black tracking-widest uppercase text-gray-400 mb-3 border-b border-gray-100 pb-0.5">Work Experience</Text>
+                <View className="space-y-4 pl-3.5 border-l border-gray-100">
+                  {experiences.map((exp) => (
+                    <View key={exp.id} className="relative">
+                      <View className="absolute w-2 h-2 rounded-full border border-white -left-[19px] top-1" style={{ backgroundColor: accentColor }} />
+                      <View className="flex-row justify-between">
+                        <Text className="text-[10px] font-extrabold text-gray-800 uppercase" style={{ fontFamily: previewFont }}>{exp.company}</Text>
+                        <Text className="text-[8.5px] font-semibold text-gray-400">{exp.startDate} - {exp.current ? 'PRESENT' : exp.endDate}</Text>
+                      </View>
+                      <Text className="text-[9.5px] font-semibold text-gray-500 italic mt-0.5">{exp.jobTitle} {exp.location ? `• ${exp.location}` : ''}</Text>
+                      {exp.description ? <Text className="text-[10.5px] text-gray-600 mt-1 leading-normal" style={{ fontFamily: previewFont }}>{exp.description}</Text> : null}
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {renderCertificationsPreview(accentColor)}
+            {renderAwardsPreview(accentColor)}
+            {renderReferencesPreview(accentColor)}
+            {renderCustomSectionPreview(accentColor)}
+          </View>
         </View>
       );
     }

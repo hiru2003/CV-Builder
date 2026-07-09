@@ -281,7 +281,7 @@ Writing Rules:
 3. Return ONLY the plain text summary.
 4. Do NOT include markdown styling, bold text, introductory remarks (e.g. "Here is your summary:"), or quotes.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ Writing Rules:
 Example output:
 Led a team of 4 engineers to design a scalable microservices architecture, Optimized SQL queries to improve database performance by 35%, Collaborated with product owners to deliver key product features ahead of schedule`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

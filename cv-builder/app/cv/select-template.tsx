@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -149,31 +149,46 @@ export default function SelectTemplateScreen() {
 
   // --- Render realistic miniature CV layouts matching their exact styles ---
   const renderMiniatureResume = (id: string, themeColor: string) => {
-    
+    const defaultName = "ALEX MORGAN";
+    const defaultTitle = "SENIOR SOFTWARE ENGINEER";
+    const defaultEmail = "alex.morgan@email.com";
+    const defaultPhone = "(555) 019-2834";
+    const defaultLoc = "San Francisco, CA";
+
+    // Helper: Profile Image placeholder
+    const avatarPlaceholder = (borderColor = '#E5E7EB', size = 20) => (
+      <View 
+        className="rounded-full bg-slate-200 border items-center justify-center" 
+        style={{ width: size, height: size, borderColor }}
+      >
+        <Ionicons name="person" size={size * 0.5} color="#9CA3AF" />
+      </View>
+    );
+
     // 1. CLASSIC CORPORATE (ATS)
     if (id === 'classic') {
       return (
-        <View className="p-3 items-center">
-          <Text className="text-[11px] font-bold text-gray-900 mb-0.5">ALEX MORGAN</Text>
-          <Text className="text-[6px] font-bold uppercase tracking-widest" style={{ color: themeColor }}>SENIOR SOFTWARE ENGINEER</Text>
-          <Text className="text-[5px] text-gray-400 mt-1 mb-2">alex.morgan@email.com  •  (555) 019-2834  •  San Francisco, CA</Text>
+        <View className="p-3 items-center flex-1 bg-white">
+          <Text className="text-[10px] font-black text-gray-900 tracking-tight">{defaultName}</Text>
+          <Text className="text-[5px] font-bold uppercase tracking-widest mt-0.5" style={{ color: themeColor }}>{defaultTitle}</Text>
+          <Text className="text-[4px] text-gray-400 mt-1 mb-1">{defaultEmail}  •  {defaultPhone}  •  {defaultLoc}</Text>
           
-          <View className="w-full border-b border-gray-200 my-1" />
+          <View className="w-full border-b border-gray-100 my-1" />
           
-          <View className="w-full mb-2">
-            <Text className="text-[6px] font-extrabold text-blue-600 uppercase tracking-wider mb-1">Professional Summary</Text>
-            <Text className="text-[5.5px] text-gray-500 leading-normal text-justify">
-              Innovative Senior Software Engineer with 8+ years of experience designing and deploying scalable cloud applications. Proven track record in optimizing backend latency.
+          <View className="w-full mb-1">
+            <Text className="text-[5px] font-black uppercase tracking-wider mb-0.5" style={{ color: themeColor }}>Summary</Text>
+            <Text className="text-[4px] text-gray-500 leading-normal text-justify">
+              Innovative Developer with 8+ years of cloud experience. Proven track record of optimizing speed and scale.
             </Text>
           </View>
 
-          <View className="w-full mb-1">
-            <Text className="text-[6px] font-extrabold text-blue-600 uppercase tracking-wider mb-1">Work Experience</Text>
+          <View className="w-full">
+            <Text className="text-[5px] font-black uppercase tracking-wider mb-0.5" style={{ color: themeColor }}>Experience</Text>
             <View className="flex-row justify-between mb-0.5">
-              <Text className="text-[5.5px] font-bold text-gray-700">Senior Software Engineer — TechCorp Inc.</Text>
-              <Text className="text-[5px] text-gray-400">2022 - Present</Text>
+              <Text className="text-[4.5px] font-bold text-gray-700">Senior Engineer — TechCorp Inc.</Text>
+              <Text className="text-[4px] text-gray-400">2022 - Pres</Text>
             </View>
-            <Text className="text-[5px] text-gray-500">• Replatformed core API service to Go/gRPC, boosting speed by 35%.</Text>
+            <Text className="text-[4px] text-gray-500 leading-snug">• Replatformed core API service, boosting speed by 35%.</Text>
           </View>
         </View>
       );
@@ -182,29 +197,28 @@ export default function SelectTemplateScreen() {
     // 2. MODERN MINIMALIST (ATS)
     if (id === 'modern') {
       return (
-        <View className="p-3 items-center">
-          <Text className="text-[12px] text-gray-900 mb-0.5" style={{ fontFamily: 'serif' }}>ALEX MORGAN</Text>
-          <Text className="text-[6px] text-gray-400 uppercase tracking-widest">SENIOR SOFTWARE ENGINEER</Text>
-          <View className="w-full border-t border-b border-gray-150 py-1 my-2 flex-row justify-center gap-1.5">
-            <Text className="text-[4.5px] text-gray-500">alex.morgan@email.com</Text>
-            <Text className="text-[4.5px] text-gray-500">•</Text>
-            <Text className="text-[4.5px] text-gray-500">San Francisco, CA</Text>
+        <View className="p-3 items-center flex-1 bg-white">
+          <Text className="text-[11px] text-gray-900 tracking-wide font-medium" style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>{defaultName}</Text>
+          <Text className="text-[5px] text-gray-400 uppercase tracking-widest mt-0.5">{defaultTitle}</Text>
+          <View className="w-full border-t border-b border-gray-150 py-0.5 my-1.5 flex-row justify-center gap-1.5">
+            <Text className="text-[4px] text-gray-500">{defaultEmail}</Text>
+            <Text className="text-[4px] text-gray-400">•</Text>
+            <Text className="text-[4px] text-gray-500">{defaultLoc}</Text>
           </View>
 
-          <View className="w-full mb-2 items-center">
-            <Text className="text-[6px] font-bold text-gray-900 uppercase tracking-wider mb-1">Summary</Text>
-            <Text className="text-[5.5px] text-gray-500 text-center leading-normal">
-              Innovative Senior Software Engineer with 8+ years of experience designing and deploying scalable cloud applications.
+          <View className="w-full mb-1.5 items-center">
+            <Text className="text-[5px] font-black text-gray-900 uppercase tracking-wider mb-0.5">Summary</Text>
+            <Text className="text-[4px] text-gray-500 text-center leading-normal">
+              Innovative Software Engineer with 8+ years of experience building reliable backend systems.
             </Text>
           </View>
 
           <View className="w-full">
-            <Text className="text-[6px] font-bold text-gray-900 uppercase tracking-wider text-center mb-1">Experience</Text>
-            <View className="flex-row justify-between items-center mb-0.5">
-              <Text className="text-[5.5px] font-bold text-gray-700">TechCorp Inc. — Senior Engineer</Text>
-              <Text className="text-[5px] text-gray-400">2022 - Present</Text>
+            <Text className="text-[5px] font-black text-gray-900 uppercase tracking-wider text-center mb-0.5">Experience</Text>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-[4.5px] font-bold text-gray-700">TechCorp Inc. — Senior Engineer</Text>
+              <Text className="text-[4px] text-gray-400">2022 - Pres</Text>
             </View>
-            <Text className="text-[5.5px] text-gray-500 text-center">Optimized backend microservices layout and database architecture.</Text>
           </View>
         </View>
       );
@@ -213,32 +227,29 @@ export default function SelectTemplateScreen() {
     // 3. CREATIVE SIDEBAR (Non-ATS)
     if (id === 'creative') {
       return (
-        <View className="flex-row flex-1">
-          <View className="w-[35%] bg-gray-50 p-2 border-r border-gray-150 items-center pt-3">
-            <View className="w-7 h-7 bg-gray-200 rounded-full mb-2 border border-gray-300 items-center justify-center">
-              <Ionicons name="person" size={10} color="#9CA3AF" />
-            </View>
-            <Text className="text-[7.5px] font-extrabold text-gray-900 text-center leading-tight">ALEX MORGAN</Text>
-            <Text className="text-[4.5px] font-bold text-amber-600 uppercase tracking-widest text-center mt-0.5">SOFTWARE ENG</Text>
+        <View className="flex-row flex-1 bg-white">
+          <View className="w-[35%] bg-slate-50 p-2 border-r border-gray-100 items-center pt-2.5">
+            {avatarPlaceholder(themeColor, 22)}
+            <Text className="text-[7px] font-black text-gray-955 text-center leading-tight mt-1">{defaultName}</Text>
+            <Text className="text-[4.2px] font-bold uppercase tracking-wider text-center mt-0.5" style={{ color: themeColor }}>DEV LEADER</Text>
             
-            <View className="w-full border-b border-gray-200 my-1.5" />
-            <Text className="text-[4px] text-gray-500 mb-0.5">alex.morgan@email.com</Text>
-            <Text className="text-[4px] text-gray-500">San Francisco, CA</Text>
+            <View className="w-full border-b border-gray-155 my-1" />
+            <Text className="text-[3.8px] text-gray-500 text-center break-all">{defaultEmail}</Text>
             
             <View className="flex-row flex-wrap gap-0.5 mt-2 justify-center">
-              <View className="bg-gray-900 px-1 py-0.2 rounded"><Text className="text-white text-[3.8px] font-bold">React</Text></View>
-              <View className="bg-gray-900 px-1 py-0.2 rounded"><Text className="text-white text-[3.8px] font-bold">Node</Text></View>
+              <View className="bg-slate-800 px-1 py-0.2 rounded"><Text className="text-white text-[3.5px] font-bold">React</Text></View>
+              <View className="bg-slate-800 px-1 py-0.2 rounded"><Text className="text-white text-[3.5px] font-bold">Node</Text></View>
             </View>
           </View>
-          <View className="w-[65%] p-2 pt-3 bg-white">
-            <Text className="text-[6px] font-extrabold text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-0.5 mb-1.5">Profile Summary</Text>
-            <Text className="text-[5px] text-gray-500 leading-normal mb-2.5">
-              Innovative Developer with 8+ years of experience leading teams and building scalable cloud-native web systems.
+          <View className="w-[65%] p-2 pt-2.5 bg-white">
+            <Text className="text-[5.5px] font-black text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-0.5 mb-1">Profile</Text>
+            <Text className="text-[4px] text-gray-500 leading-normal mb-2">
+              Developer with 8+ years of experience leading teams and building scalable web systems.
             </Text>
 
-            <Text className="text-[6px] font-extrabold text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-0.5 mb-1">Experience</Text>
-            <Text className="text-[5.5px] font-bold text-gray-800">Senior Developer — TechCorp</Text>
-            <Text className="text-[4.5px] text-gray-400">2022 - Present</Text>
+            <Text className="text-[5.5px] font-black text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-0.5 mb-0.5">Experience</Text>
+            <Text className="text-[4.5px] font-bold text-gray-700">Senior Developer — TechCorp</Text>
+            <Text className="text-[3.8px] text-gray-400">2022 - Present</Text>
           </View>
         </View>
       );
@@ -247,23 +258,21 @@ export default function SelectTemplateScreen() {
     // 4. ELEGANT BANNER (Non-ATS)
     if (id === 'banner') {
       return (
-        <View className="flex-1">
-          <View className="bg-gray-800 p-2.5 flex-row items-center gap-2">
-            <View className="w-6 h-6 bg-gray-600 rounded-full border border-white items-center justify-center">
-              <Ionicons name="person" size={8} color="white" />
-            </View>
+        <View className="flex-1 bg-white">
+          <View className="bg-slate-900 p-2 flex-row items-center gap-2">
+            {avatarPlaceholder(themeColor, 18)}
             <View>
-              <Text className="text-white text-[9px] font-bold">ALEX MORGAN</Text>
-              <Text className="text-blue-400 text-[5px] uppercase font-bold">SENIOR SOFTWARE ENGINEER</Text>
+              <Text className="text-white text-[8px] font-bold">{defaultName}</Text>
+              <Text className="text-blue-400 text-[4.5px] uppercase font-bold tracking-wider">{defaultTitle}</Text>
             </View>
           </View>
-          <View className="p-2.5">
-            <Text className="text-[6px] font-bold border-b border-gray-150 pb-0.5 mb-1">Summary</Text>
-            <Text className="text-[5.5px] text-gray-500 leading-normal mb-2">
-              8+ years of experience building secure, scalable cloud-native backend infrastructures.
+          <View className="p-2">
+            <Text className="text-[5px] font-bold border-b border-gray-100 pb-0.5 mb-1">Summary</Text>
+            <Text className="text-[4px] text-gray-500 leading-normal mb-1.5">
+              8+ years of experience building secure, scalable cloud backend systems.
             </Text>
-            <Text className="text-[6px] font-bold border-b border-gray-150 pb-0.5 mb-1">Experience</Text>
-            <Text className="text-[5.5px] font-bold text-gray-700">Lead Tech Architect — TechCorp</Text>
+            <Text className="text-[5px] font-bold border-b border-gray-100 pb-0.5 mb-0.5">Experience</Text>
+            <Text className="text-[4.5px] font-bold text-gray-700">Lead Tech Architect — TechCorp</Text>
           </View>
         </View>
       );
@@ -272,17 +281,19 @@ export default function SelectTemplateScreen() {
     // 5. Modern TIMELINE (ATS)
     if (id === 'timeline') {
       return (
-        <View className="p-3">
-          <Text className="text-[12px] font-black text-gray-900">ALEX MORGAN</Text>
-          <Text className="text-[5.5px] font-bold text-emerald-600 uppercase tracking-wider mb-2">SENIOR SOFTWARE ENGINEER</Text>
-          <View className="border-l border-emerald-500 pl-2 ml-0.5 gap-2">
-            <View>
-              <Text className="text-[5px] font-bold text-gray-900 uppercase">Summary</Text>
-              <Text className="text-[5px] text-gray-500 mt-0.5">8+ years of experience deploying microservices pipelines.</Text>
+        <View className="p-3 flex-1 bg-white">
+          <Text className="text-[10px] font-black text-gray-955">{defaultName}</Text>
+          <Text className="text-[5px] font-bold uppercase tracking-wider mb-1.5" style={{ color: themeColor }}>{defaultTitle}</Text>
+          <View className="border-l pl-2 ml-1 gap-1.5" style={{ borderColor: themeColor }}>
+            <View className="relative">
+              <View className="absolute w-1.5 h-1.5 rounded-full -left-[11px] top-0.5" style={{ backgroundColor: themeColor }} />
+              <Text className="text-[4.5px] font-bold text-gray-800">Summary</Text>
+              <Text className="text-[4px] text-gray-500">8+ years of experience deploying microservices.</Text>
             </View>
-            <View>
-              <Text className="text-[5px] font-bold text-gray-900 uppercase">Experience</Text>
-              <Text className="text-[5px] text-gray-500 mt-0.5">TechCorp Inc. • Senior DevOps Engineer</Text>
+            <View className="relative">
+              <View className="absolute w-1.5 h-1.5 rounded-full -left-[11px] top-0.5" style={{ backgroundColor: themeColor }} />
+              <Text className="text-[4.5px] font-bold text-gray-800">Experience</Text>
+              <Text className="text-[4px] text-gray-500">TechCorp Inc. • Lead Engineer</Text>
             </View>
           </View>
         </View>
@@ -292,24 +303,22 @@ export default function SelectTemplateScreen() {
     // 6. EXECUTIVE PREMIUM (Non-ATS)
     if (id === 'executive') {
       return (
-        <View className="flex-1">
-          <View className="bg-indigo-950 p-3 flex-row items-center justify-between border-b-2 border-amber-500">
+        <View className="flex-1 bg-white">
+          <View className="bg-indigo-950 p-2 flex-row items-center justify-between border-b-2 border-amber-500">
             <View>
-              <Text className="text-white text-[9.5px] font-bold">ALEX MORGAN</Text>
-              <Text className="text-amber-500 text-[5px] uppercase font-bold tracking-wider mt-0.5">CHIEF TECHNOLOGY OFFICER</Text>
+              <Text className="text-white text-[8px] font-bold">{defaultName}</Text>
+              <Text className="text-amber-500 text-[4px] uppercase font-bold tracking-widest mt-0.5">CHIEF TECHNOLOGY OFFICER</Text>
             </View>
-            <View className="w-6 h-6 bg-gray-700 rounded-md border border-amber-500 items-center justify-center">
-              <Ionicons name="person" size={8} color="white" />
-            </View>
+            {avatarPlaceholder('#F59E0B', 16)}
           </View>
-          <View className="p-2.5 flex-row gap-2">
+          <View className="p-2 flex-row gap-2">
             <View className="w-[60%]">
-              <Text className="text-[5.5px] font-bold text-indigo-900 border-b border-gray-150 pb-0.5">Summary</Text>
-              <Text className="text-[4.8px] text-gray-500 mt-1">High-impact technology leader managing DevOps operations.</Text>
+              <Text className="text-[5px] font-bold text-indigo-900 border-b border-gray-150 pb-0.5">Summary</Text>
+              <Text className="text-[4px] text-gray-500 mt-1">High-impact technology leader managing operations.</Text>
             </View>
             <View className="w-[40%]">
-              <Text className="text-[5.5px] font-bold text-indigo-900 border-b border-gray-150 pb-0.5">Core Skills</Text>
-              <View className="bg-indigo-950 px-1 py-0.2 rounded mt-1 self-start"><Text className="text-white text-[3.8px] font-bold">AWS</Text></View>
+              <Text className="text-[5px] font-bold text-indigo-900 border-b border-gray-150 pb-0.5">Core Skills</Text>
+              <View className="bg-indigo-950 px-1 py-0.2 rounded mt-1 self-start"><Text className="text-white text-[3.2px] font-bold">AWS Cloud</Text></View>
             </View>
           </View>
         </View>
@@ -319,20 +328,20 @@ export default function SelectTemplateScreen() {
     // 7. CLEAN COMPACT (ATS)
     if (id === 'compact') {
       return (
-        <View className="p-2.5">
-          <View className="flex-row justify-between border-b border-teal-600 pb-1 mb-2">
+        <View className="p-3 flex-1 bg-white">
+          <View className="flex-row justify-between border-b border-teal-600 pb-0.5 mb-1.5">
             <View>
-              <Text className="text-[10px] font-bold text-teal-600">ALEX MORGAN</Text>
-              <Text className="text-[5px] text-gray-500 font-bold uppercase">SENIOR SOFTWARE ENGINEER</Text>
+              <Text className="text-[9px] font-black text-teal-600">{defaultName}</Text>
+              <Text className="text-[4.5px] text-gray-400 font-bold uppercase tracking-wider">{defaultTitle}</Text>
             </View>
           </View>
-          <View className="mb-2">
-            <Text className="text-[5px] font-bold text-teal-600 uppercase">Summary</Text>
-            <Text className="text-[4.8px] text-gray-650 mt-0.5">Innovative Senior Software Engineer with 8+ years of cloud experience.</Text>
+          <View className="mb-1">
+            <Text className="text-[4.5px] font-bold text-teal-650 uppercase">Summary</Text>
+            <Text className="text-[4px] text-gray-500">8+ years of software design experience.</Text>
           </View>
           <View>
-            <Text className="text-[5px] font-bold text-teal-600 uppercase">Experience</Text>
-            <Text className="text-[4.8px] text-gray-650 mt-0.5">TechCorp Inc. — Senior DevOps Lead</Text>
+            <Text className="text-[4.5px] font-bold text-teal-650 uppercase">Experience</Text>
+            <Text className="text-[4px] text-gray-500">TechCorp Inc. — Developer</Text>
           </View>
         </View>
       );
@@ -341,15 +350,13 @@ export default function SelectTemplateScreen() {
     // 8. VIBRANT CRIMSON (Non-ATS)
     if (id === 'vibrant') {
       return (
-        <View className="p-3 items-center">
-          <View className="w-6 h-6 bg-gray-100 rounded-full border border-red-500 items-center justify-center mb-1">
-            <Ionicons name="person" size={8} color="#ef4444" />
-          </View>
-          <Text className="text-[10px] font-bold text-red-600">ALEX MORGAN</Text>
-          <Text className="text-[5px] font-bold text-gray-400 uppercase tracking-widest">SENIOR DEVELOPER</Text>
-          <View className="w-full mt-2">
-            <Text className="bg-red-600 text-white text-[5px] px-1 py-0.2 rounded font-bold text-center">Professional Summary</Text>
-            <Text className="text-[4.8px] text-gray-500 mt-1 text-center">8+ years of frontend expertise building solid React apps.</Text>
+        <View className="p-3 items-center flex-1 bg-white">
+          {avatarPlaceholder('#EF4444', 20)}
+          <Text className="text-[9px] font-black text-red-600 mt-1">{defaultName}</Text>
+          <Text className="text-[4.5px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{defaultTitle}</Text>
+          <View className="w-full mt-1.5">
+            <Text className="bg-red-600 text-white text-[4px] px-1 py-0.2 rounded font-bold text-center">Summary</Text>
+            <Text className="text-[3.8px] text-gray-500 mt-0.5 text-center">Frontend developer building robust applications.</Text>
           </View>
         </View>
       );
@@ -358,14 +365,14 @@ export default function SelectTemplateScreen() {
     // 9. DEVELOPER TERMINAL (ATS)
     if (id === 'tech') {
       return (
-        <View className="p-3">
-          <View className="border-l-2 border-emerald-600 pl-2 mb-2">
-            <Text className="text-[10px] font-bold text-gray-900">ALEX MORGAN</Text>
-            <Text className="text-[5px] text-emerald-600 font-semibold">SENIOR DEV</Text>
+        <View className="p-3 flex-1 bg-white">
+          <View className="border-l-2 border-emerald-600 pl-2 mb-1.5">
+            <Text className="text-[9px] font-black text-gray-900">{defaultName}</Text>
+            <Text className="text-[4.5px] text-emerald-600 font-semibold">{defaultTitle}</Text>
           </View>
-          <View className="mb-1.5 pl-2 border-l border-gray-150">
-            <Text className="text-[5px] font-bold text-emerald-600">{"> SUMMARY"}</Text>
-            <Text className="text-[4.8px] text-gray-500 mt-0.5">8+ years of Kubernetes cluster orchestration systems.</Text>
+          <View className="pl-2 border-l border-gray-150">
+            <Text className="text-[4.5px] font-bold text-emerald-600">{"> SUMMARY"}</Text>
+            <Text className="text-[3.8px] text-gray-500 leading-normal">8+ years Kubernetes cluster management.</Text>
           </View>
         </View>
       );
@@ -374,18 +381,16 @@ export default function SelectTemplateScreen() {
     // 10. MODERN SPLIT (Non-ATS)
     if (id === 'split') {
       return (
-        <View className="flex-row flex-1">
-          <View className="w-[40%] bg-slate-800 p-2 items-center pt-3">
-            <View className="w-6 h-6 bg-slate-600 rounded-full mb-1.5 items-center justify-center">
-              <Ionicons name="person" size={8} color="white" />
-            </View>
-            <Text className="text-white text-[8px] font-bold text-center">ALEX MORGAN</Text>
-            <Text className="text-gray-400 text-[4px] uppercase tracking-wider text-center mt-0.5">TECH CONSULTANT</Text>
+        <View className="flex-row flex-1 bg-white">
+          <View className="w-[40%] bg-slate-800 p-2 items-center pt-2.5">
+            {avatarPlaceholder(themeColor, 18)}
+            <Text className="text-white text-[7.5px] font-bold text-center mt-1">{defaultName}</Text>
+            <Text className="text-gray-400 text-[4px] uppercase tracking-wider text-center mt-0.5">DEV ARCHITECT</Text>
           </View>
-          <View className="w-[60%] p-2 pt-3 bg-white">
-            <Text className="text-gray-900 font-bold border-b border-gray-150 pb-0.5 text-[5.5px]">SUMMARY</Text>
-            <Text className="text-[5px] text-gray-500 mt-1 leading-normal">
-              Senior consultant advising tech startups on scalability.
+          <View className="w-[60%] p-2 pt-2.5 bg-white">
+            <Text className="text-gray-900 font-bold border-b border-gray-150 pb-0.5 text-[5px]">SUMMARY</Text>
+            <Text className="text-[3.8px] text-gray-500 mt-1 leading-normal">
+              Developer building scalable web architectures.
             </Text>
           </View>
         </View>

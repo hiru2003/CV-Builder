@@ -75,6 +75,8 @@ export default function CreateCVScreen() {
 
   // --- AI Summary State ---
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [generatingExperienceId, setGeneratingExperienceId] = useState<string | null>(null);
+  const [pendingAIAction, setPendingAIAction] = useState<{ type: 'summary' | 'experience'; expId?: string } | null>(null);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [customApiKey, setCustomApiKey] = useState('');
 
@@ -245,6 +247,7 @@ export default function CreateCVScreen() {
     const apiKey = providedKey || customApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
+      setPendingAIAction({ type: 'summary' });
       setShowApiKeyModal(true);
       return;
     }
@@ -314,6 +317,84 @@ Writing Rules:
       );
     } finally {
       setIsGeneratingSummary(false);
+    }
+  };
+
+  const generateExperienceWithAI = async (expId: string, providedKey?: string) => {
+    const apiKey = providedKey || customApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      setPendingAIAction({ type: 'experience', expId });
+      setShowApiKeyModal(true);
+      return;
+    }
+
+    const exp = experiences.find(e => e.id === expId);
+    if (!exp || !exp.jobTitle.trim()) {
+      Alert.alert('Job Title Required', 'Please enter a Position/Job Title for this experience before generating details.');
+      return;
+    }
+
+    try {
+      setGeneratingExperienceId(expId);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const jobTitlePrompt = `Job Title: ${exp.jobTitle}`;
+      const companyPrompt = exp.company ? `Company: ${exp.company}` : '';
+      const locationPrompt = exp.location ? `Location: ${exp.location}` : '';
+
+      const prompt = `You are a professional resume writer. Write 3-4 high-impact, professional resume accomplishment statements (bullet points) for the following job role:
+${jobTitlePrompt}
+${companyPrompt}
+${locationPrompt}
+
+Writing Rules:
+1. Each statement must start with a strong action verb (e.g., Developed, Led, Managed, Optimized, Created, Designed).
+2. Highlight professional achievements, responsibilities, and key skills relevant to this role.
+3. Keep each statement concise and results-oriented.
+4. Return ONLY the statements separated by a comma and a space. Do NOT use bullet points (such as "-", "•", "*"), numbers, newlines, markdown formatting, or bold text. 
+5. Do NOT include introductory or concluding remarks. Just return the comma-separated statements as a single paragraph.
+
+Example output:
+Led a team of 4 engineers to design a scalable microservices architecture, Optimized SQL queries to improve database performance by 35%, Collaborated with product owners to deliver key product features ahead of schedule`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!generatedText) {
+        throw new Error('No text was returned from the API.');
+      }
+
+      const cleanedText = generatedText.replace(/\*\*/g, '').replace(/"/g, '').trim();
+      
+      updateExperience(expId, 'description', cleanedText);
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error: any) {
+      console.error('Gemini API Error (Experience):', error);
+      Alert.alert(
+        'Generation Failed',
+        'Could not generate experience details. Please check your network connection and verify your Gemini API key.'
+      );
+    } finally {
+      setGeneratingExperienceId(null);
     }
   };
 
@@ -2831,7 +2912,23 @@ Writing Rules:
                         </View>
 
                         <View>
-                          <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Description (comma separated points)</Text>
+                          <View className="flex-row justify-between items-center mb-1.5">
+                            <Text className="text-[10px] font-bold text-gray-500 uppercase">Description (comma separated points)</Text>
+                            <TouchableOpacity 
+                              onPress={() => generateExperienceWithAI(exp.id)}
+                              disabled={generatingExperienceId !== null}
+                              className={`flex-row items-center px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 ${generatingExperienceId !== null ? 'opacity-60' : ''}`}
+                            >
+                              {generatingExperienceId === exp.id ? (
+                                <ActivityIndicator size="small" color="#2563EB" style={{ marginRight: 4 }} />
+                              ) : (
+                                <Ionicons name="sparkles-outline" size={12} color="#2563EB" style={{ marginRight: 4 }} />
+                              )}
+                              <Text className="text-blue-600 font-bold text-[10px]">
+                                {generatingExperienceId === exp.id ? 'Generating...' : 'AI Generate'}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
                           <TextInput 
                             className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium min-h-[100px]" 
                             placeholder="Led a team of 5 developers..., Implemented CI/CD pipelines..." 
@@ -3950,7 +4047,10 @@ Writing Rules:
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                onPress={() => setShowApiKeyModal(false)}
+                onPress={() => {
+                  setShowApiKeyModal(false);
+                  setPendingAIAction(null);
+                }}
                 className="flex-1 py-3 border border-gray-200 rounded-2xl items-center bg-white"
               >
                 <Text className="text-gray-500 font-bold text-sm">Cancel</Text>
@@ -3959,7 +4059,13 @@ Writing Rules:
                 onPress={() => {
                   if (customApiKey.trim()) {
                     setShowApiKeyModal(false);
-                    generateSummaryWithAI(customApiKey.trim());
+                    const apiKey = customApiKey.trim();
+                    if (pendingAIAction?.type === 'experience' && pendingAIAction.expId) {
+                      generateExperienceWithAI(pendingAIAction.expId, apiKey);
+                    } else {
+                      generateSummaryWithAI(apiKey);
+                    }
+                    setPendingAIAction(null);
                   } else {
                     Alert.alert('Key Required', 'Please enter a valid Gemini API key.');
                   }

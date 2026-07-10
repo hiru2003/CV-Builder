@@ -1609,8 +1609,8 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
     };
 
     // Helper: Contact Row Details
-    const renderContactDetails = () => (
-      <View className="flex-row flex-wrap justify-center gap-x-2 gap-y-1">
+    const renderContactDetails = (alignment: 'center' | 'left' = 'center') => (
+      <View className={`flex-row flex-wrap gap-x-2 gap-y-1 ${alignment === 'left' ? 'justify-start' : 'justify-center'}`}>
         {personalInfo.email && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>{personalInfo.email}</Text>}
         {personalInfo.phone && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.phone}</Text>}
         {personalInfo.address && <Text className="text-[10px] text-gray-500" style={{ fontFamily: previewFont }}>• {personalInfo.address}</Text>}
@@ -1969,6 +1969,8 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
               <View className="flex-row flex-wrap gap-2 mt-2">
                 {personalInfo.email && <Text className="text-[9px] text-gray-300">{personalInfo.email}</Text>}
                 {personalInfo.phone && <Text className="text-[9px] text-gray-300">• {personalInfo.phone}</Text>}
+                {personalInfo.address && <Text className="text-[9px] text-gray-300">• {personalInfo.address}</Text>}
+                {personalInfo.linkedin && <Text className="text-[9px] text-gray-300">• {personalInfo.linkedin}</Text>}
                 {personalInfo.github && <Text className="text-[9px] text-gray-300">• {personalInfo.github}</Text>}
               </View>
             </View>
@@ -1995,7 +1997,10 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
       return (
         <View className="bg-white border border-gray-200 rounded-3xl p-6 min-h-[600px] mb-12" style={styles.previewShadow}>
           <Text className="text-2xl font-black text-gray-900">{personalInfo.fullName || 'YOUR NAME'}</Text>
-          <Text className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+          <Text className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
+          <View className="mb-4">
+            {renderContactDetails('left')}
+          </View>
           <View className="border-l-2 border-emerald-500 pl-4 ml-1">
             {summary ? <View className="mb-5"><Text className="text-[10px] font-bold text-gray-900 uppercase">Summary</Text><Text className="text-xs text-gray-600 mt-1">{summary}</Text></View> : null}
             {renderExperiencePreview('#111827')}
@@ -2023,7 +2028,10 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
               <Text className="text-amber-500 text-[10px] uppercase font-bold tracking-wider mt-1">{personalInfo.jobTitle || 'JOB TITLE'}</Text>
               <View className="flex-row flex-wrap gap-2 mt-2">
                 {personalInfo.email && <Text className="text-[9px] text-slate-300">{personalInfo.email}</Text>}
+                {personalInfo.phone && <Text className="text-[9px] text-slate-300">• {personalInfo.phone}</Text>}
+                {personalInfo.address && <Text className="text-[9px] text-slate-300">• {personalInfo.address}</Text>}
                 {personalInfo.linkedin && <Text className="text-[9px] text-slate-300">• {personalInfo.linkedin}</Text>}
+                {personalInfo.github && <Text className="text-[9px] text-slate-300">• {personalInfo.github}</Text>}
               </View>
             </View>
             {photoPreview}
@@ -2061,6 +2069,9 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
             <View className="items-end">
               {personalInfo.email && <Text className="text-[9px] text-gray-500">{personalInfo.email}</Text>}
               {personalInfo.phone && <Text className="text-[9px] text-gray-500">{personalInfo.phone}</Text>}
+              {personalInfo.address && <Text className="text-[9px] text-gray-500">{personalInfo.address}</Text>}
+              {personalInfo.linkedin && <Text className="text-[9px] text-gray-500">{personalInfo.linkedin}</Text>}
+              {personalInfo.github && <Text className="text-[9px] text-gray-500">{personalInfo.github}</Text>}
             </View>
           </View>
           {summary ? <View className="mb-3"><Text className="text-[9px] font-bold text-teal-600 uppercase">Summary</Text><Text className="text-xs text-gray-600 mt-1">{summary}</Text></View> : null}
@@ -2244,7 +2255,13 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
                 {personalInfo.linkedin ? (
                   <View className="flex-row items-center">
                     <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>🌐</Text>
-                    <Text className="text-[9px] text-gray-650 break-all flex-1" style={{ fontFamily: previewFont }}>{personalInfo.linkedin}</Text>
+                    <Text className="text-[9px] text-gray-655 break-all flex-1" style={{ fontFamily: previewFont }}>{personalInfo.linkedin}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.github ? (
+                  <View className="flex-row items-center">
+                    <Text className="text-[10px] mr-1.5" style={{ color: accentColor }}>💻</Text>
+                    <Text className="text-[9px] text-gray-650 break-all flex-1" style={{ fontFamily: previewFont }}>{personalInfo.github}</Text>
                   </View>
                 ) : null}
               </View>
@@ -2389,6 +2406,18 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
                     <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>{personalInfo.address}</Text>
                   </View>
                 ) : null}
+                {personalInfo.linkedin ? (
+                  <View>
+                    <Text className="text-[8px] font-bold text-white/70 uppercase">LinkedIn</Text>
+                    <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>{personalInfo.linkedin}</Text>
+                  </View>
+                ) : null}
+                {personalInfo.github ? (
+                  <View>
+                    <Text className="text-[8px] font-bold text-white/70 uppercase">GitHub</Text>
+                    <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>{personalInfo.github}</Text>
+                  </View>
+                ) : null}
               </View>
             </View>
 
@@ -2520,6 +2549,8 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
                 {personalInfo.phone ? <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>📞 {personalInfo.phone}</Text> : null}
                 {personalInfo.email ? <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>✉ {personalInfo.email}</Text> : null}
                 {personalInfo.address ? <Text className="text-[9px] text-white" style={{ fontFamily: previewFont }}>📍 {personalInfo.address}</Text> : null}
+                {personalInfo.linkedin ? <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>🌐 {personalInfo.linkedin}</Text> : null}
+                {personalInfo.github ? <Text className="text-[9px] text-white break-all" style={{ fontFamily: previewFont }}>💻 {personalInfo.github}</Text> : null}
               </View>
             </View>
 
@@ -2628,6 +2659,9 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
             <Text className="text-white text-[9px] font-bold border-b border-slate-700 pb-1 mb-2">CONTACT</Text>
             {personalInfo.email && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.email}</Text>}
             {personalInfo.phone && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.phone}</Text>}
+            {personalInfo.address && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.address}</Text>}
+            {personalInfo.linkedin && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.linkedin}</Text>}
+            {personalInfo.github && <Text className="text-[8px] text-gray-300 mb-1">{personalInfo.github}</Text>}
             
             {skills.length > 0 && (
               <View className="mt-4">

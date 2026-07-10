@@ -36,6 +36,24 @@ export default function CreateCVScreen() {
   // --- Form Data State ---
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({ fullName: '', jobTitle: '', email: '', phone: '', address: '', linkedin: '', github: '' });
   const [photoInfo, setPhotoInfo] = useState<{ uri: string; base64: string } | null>(null);
+  
+  // --- Personal details input focus/blur states to show checkmark when typing is ended ---
+  const [isFullNameFocused, setIsFullNameFocused] = useState(false);
+  const [isJobTitleFocused, setIsJobTitleFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+  const [isAddressFocused, setIsAddressFocused] = useState(false);
+  const [isLinkedinFocused, setIsLinkedinFocused] = useState(false);
+  const [isGithubFocused, setIsGithubFocused] = useState(false);
+
+  const [fullNameBlurred, setFullNameBlurred] = useState(false);
+  const [jobTitleBlurred, setJobTitleBlurred] = useState(false);
+  const [emailBlurred, setEmailBlurred] = useState(false);
+  const [phoneBlurred, setPhoneBlurred] = useState(false);
+  const [addressBlurred, setAddressBlurred] = useState(false);
+  const [linkedinBlurred, setLinkedinBlurred] = useState(false);
+  const [githubBlurred, setGithubBlurred] = useState(false);
+
   const [summary, setSummary] = useState('');
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
@@ -2834,37 +2852,161 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
 
                   <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">FULL NAME</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="e.g. John Doe" placeholderTextColor="#9CA3AF" value={personalInfo.fullName} onChangeText={t => setPersonalInfo({...personalInfo, fullName: t})} />
+                    <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                      <TextInput 
+                        className="flex-1 text-gray-900 font-medium p-0" 
+                        placeholder="e.g. John Doe" 
+                        placeholderTextColor="#9CA3AF" 
+                        value={personalInfo.fullName} 
+                        onChangeText={t => setPersonalInfo({...personalInfo, fullName: t})} 
+                        onFocus={() => setIsFullNameFocused(true)}
+                        onBlur={() => {
+                          setIsFullNameFocused(false);
+                          setFullNameBlurred(true);
+                        }}
+                        style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                      />
+                      {fullNameBlurred && !isFullNameFocused && personalInfo.fullName.trim().length >= 3 && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                      )}
+                    </View>
                   </View>
 
                   <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">JOB TITLE</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="e.g. Software Engineer" placeholderTextColor="#9CA3AF" value={personalInfo.jobTitle} onChangeText={t => setPersonalInfo({...personalInfo, jobTitle: t})} />
+                    <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                      <TextInput 
+                        className="flex-1 text-gray-900 font-medium p-0" 
+                        placeholder="e.g. Software Engineer" 
+                        placeholderTextColor="#9CA3AF" 
+                        value={personalInfo.jobTitle} 
+                        onChangeText={t => setPersonalInfo({...personalInfo, jobTitle: t})} 
+                        onFocus={() => setIsJobTitleFocused(true)}
+                        onBlur={() => {
+                          setIsJobTitleFocused(false);
+                          setJobTitleBlurred(true);
+                        }}
+                        style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                      />
+                      {jobTitleBlurred && !isJobTitleFocused && personalInfo.jobTitle.trim().length >= 3 && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                      )}
+                    </View>
                   </View>
 
                   <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">EMAIL</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="john@example.com" placeholderTextColor="#9CA3AF" value={personalInfo.email} onChangeText={t => setPersonalInfo({...personalInfo, email: t})} keyboardType="email-address" autoCapitalize="none" />
+                    <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                      <TextInput 
+                        className="flex-1 text-gray-900 font-medium p-0" 
+                        placeholder="john@example.com" 
+                        placeholderTextColor="#9CA3AF" 
+                        value={personalInfo.email} 
+                        onChangeText={t => setPersonalInfo({...personalInfo, email: t})} 
+                        keyboardType="email-address" 
+                        autoCapitalize="none" 
+                        onFocus={() => setIsEmailFocused(true)}
+                        onBlur={() => {
+                          setIsEmailFocused(false);
+                          setEmailBlurred(true);
+                        }}
+                        style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                      />
+                      {emailBlurred && !isEmailFocused && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalInfo.email) && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                      )}
+                    </View>
                   </View>
 
                   <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">PHONE</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="+1 234 567 890" placeholderTextColor="#9CA3AF" value={personalInfo.phone} onChangeText={t => setPersonalInfo({...personalInfo, phone: t})} keyboardType="phone-pad" />
+                    <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                      <TextInput 
+                        className="flex-1 text-gray-900 font-medium p-0" 
+                        placeholder="+1 234 567 890" 
+                        placeholderTextColor="#9CA3AF" 
+                        value={personalInfo.phone} 
+                        onChangeText={t => setPersonalInfo({...personalInfo, phone: t})} 
+                        keyboardType="phone-pad" 
+                        onFocus={() => setIsPhoneFocused(true)}
+                        onBlur={() => {
+                          setIsPhoneFocused(false);
+                          setPhoneBlurred(true);
+                        }}
+                        style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                      />
+                      {phoneBlurred && !isPhoneFocused && personalInfo.phone.trim().length >= 5 && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                      )}
+                    </View>
                   </View>
 
                   <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">ADDRESS</Text>
-                    <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" placeholder="City, Country" placeholderTextColor="#9CA3AF" value={personalInfo.address} onChangeText={t => setPersonalInfo({...personalInfo, address: t})} />
+                    <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                      <TextInput 
+                        className="flex-1 text-gray-900 font-medium p-0" 
+                        placeholder="City, Country" 
+                        placeholderTextColor="#9CA3AF" 
+                        value={personalInfo.address} 
+                        onChangeText={t => setPersonalInfo({...personalInfo, address: t})} 
+                        onFocus={() => setIsAddressFocused(true)}
+                        onBlur={() => {
+                          setIsAddressFocused(false);
+                          setAddressBlurred(true);
+                        }}
+                        style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                      />
+                      {addressBlurred && !isAddressFocused && personalInfo.address.trim().length >= 3 && (
+                        <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                      )}
+                    </View>
                   </View>
 
                   <View className="flex-row justify-between gap-4">
                     <View className="flex-1 mb-4">
                       <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">LINKEDIN URL</Text>
-                      <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium text-sm" placeholder="linkedin.com/in/johndoe" placeholderTextColor="#9CA3AF" value={personalInfo.linkedin} onChangeText={t => setPersonalInfo({...personalInfo, linkedin: t})} autoCapitalize="none" />
+                      <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                        <TextInput 
+                          className="flex-1 text-gray-900 font-medium text-sm p-0" 
+                          placeholder="linkedin.com/in/johndoe" 
+                          placeholderTextColor="#9CA3AF" 
+                          value={personalInfo.linkedin} 
+                          onChangeText={t => setPersonalInfo({...personalInfo, linkedin: t})} 
+                          autoCapitalize="none" 
+                          onFocus={() => setIsLinkedinFocused(true)}
+                          onBlur={() => {
+                            setIsLinkedinFocused(false);
+                            setLinkedinBlurred(true);
+                          }}
+                          style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                        />
+                        {linkedinBlurred && !isLinkedinFocused && personalInfo.linkedin.trim().length >= 5 && (
+                          <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                        )}
+                      </View>
                     </View>
                     <View className="flex-1 mb-4">
                       <Text className="text-xs font-bold text-gray-500 mb-2 tracking-wide">GITHUB URL</Text>
-                      <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium text-sm" placeholder="github.com/johndoe" placeholderTextColor="#9CA3AF" value={personalInfo.github} onChangeText={t => setPersonalInfo({...personalInfo, github: t})} autoCapitalize="none" />
+                      <View className="flex-row items-center bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4">
+                        <TextInput 
+                          className="flex-1 text-gray-900 font-medium text-sm p-0" 
+                          placeholder="github.com/johndoe" 
+                          placeholderTextColor="#9CA3AF" 
+                          value={personalInfo.github} 
+                          onChangeText={t => setPersonalInfo({...personalInfo, github: t})} 
+                          autoCapitalize="none" 
+                          onFocus={() => setIsGithubFocused(true)}
+                          onBlur={() => {
+                            setIsGithubFocused(false);
+                            setGithubBlurred(true);
+                          }}
+                          style={Platform.OS === 'web' ? { outlineStyle: 'none' as any } : undefined}
+                        />
+                        {githubBlurred && !isGithubFocused && personalInfo.github.trim().length >= 5 && (
+                          <Ionicons name="checkmark-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                        )}
+                      </View>
                     </View>
                   </View>
 

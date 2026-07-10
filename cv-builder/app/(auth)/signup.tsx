@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../config/firebaseConfig';
 import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SignupScreen() {
   const [fullName, setFullName] = useState('');
@@ -21,19 +22,51 @@ export default function SignupScreen() {
   const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false);
   const router = useRouter();
 
+  const fullNameInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
+  const confirmPasswordInputRef = useRef<TextInput>(null);
+
+  const validateFullName = (text: string) => {
+    return text.trim().length >= 3;
+  };
+
+  const validateEmail = (text: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(text);
+  };
+
+  const validatePassword = (text: string) => {
+    return text.length >= 6;
+  };
+
+  const validateConfirmPassword = (confirm: string, pass: string) => {
+    return confirm.length >= 6 && confirm === pass;
+  };
+
   const handleSignup = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
       Alert.alert('Validation Error', 'Please fill in all fields');
       return;
     }
 
-    if (password !== confirmPassword) {
-      Alert.alert('Validation Error', 'Passwords do not match');
+    if (!validateFullName(fullName)) {
+      Alert.alert('Validation Error', 'Full Name must be at least 3 characters');
       return;
     }
 
-    if (password.length < 6) {
+    if (!validateEmail(email)) {
+      Alert.alert('Validation Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!validatePassword(password)) {
       Alert.alert('Validation Error', 'Password should be at least 6 characters');
+      return;
+    }
+
+    if (!validateConfirmPassword(confirmPassword, password)) {
+      Alert.alert('Validation Error', 'Passwords do not match');
       return;
     }
 
@@ -108,40 +141,52 @@ export default function SignupScreen() {
             {/* Full Name Field */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Full Name</Text>
-              <TextInput
+              <Pressable 
                 style={[
-                  styles.input, 
-                  isNameFocused && styles.inputFocused
+                  styles.inputWrapper, 
+                  isNameFocused && styles.inputWrapperFocused
                 ]}
-                placeholder="John Doe"
-                placeholderTextColor="#A3A3A3"
-                value={fullName}
-                onChangeText={setFullName}
-                autoCapitalize="words"
-                autoCorrect={false}
-                onFocus={() => setIsNameFocused(true)}
-                onBlur={() => setIsNameFocused(false)}
-              />
+                onPress={() => fullNameInputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={fullNameInputRef}
+                  style={styles.input}
+                  placeholder="John Doe"
+                  placeholderTextColor="#A3A3A3"
+                  value={fullName}
+                  onChangeText={setFullName}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  onFocus={() => setIsNameFocused(true)}
+                  onBlur={() => setIsNameFocused(false)}
+                />
+              </Pressable>
             </View>
 
             {/* Email Field */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email Address</Text>
-              <TextInput
+              <Pressable 
                 style={[
-                  styles.input, 
-                  isEmailFocused && styles.inputFocused
+                  styles.inputWrapper, 
+                  isEmailFocused && styles.inputWrapperFocused
                 ]}
-                placeholder="name@example.com"
-                placeholderTextColor="#A3A3A3"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                onFocus={() => setIsEmailFocused(true)}
-                onBlur={() => setIsEmailFocused(false)}
-              />
+                onPress={() => emailInputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={emailInputRef}
+                  style={styles.input}
+                  placeholder="name@example.com"
+                  placeholderTextColor="#A3A3A3"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onFocus={() => setIsEmailFocused(true)}
+                  onBlur={() => setIsEmailFocused(false)}
+                />
+              </Pressable>
             </View>
 
             {/* Password Field */}
@@ -152,21 +197,27 @@ export default function SignupScreen() {
                   <Text style={styles.toggleText}>{showPassword ? 'Hide' : 'Show'}</Text>
                 </TouchableOpacity>
               </View>
-              <TextInput
+              <Pressable 
                 style={[
-                  styles.input, 
-                  isPasswordFocused && styles.inputFocused
+                  styles.inputWrapper, 
+                  isPasswordFocused && styles.inputWrapperFocused
                 ]}
-                placeholder="Password (min 6 characters)"
-                placeholderTextColor="#A3A3A3"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onFocus={() => setIsPasswordFocused(true)}
-                onBlur={() => setIsPasswordFocused(false)}
-              />
+                onPress={() => passwordInputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={passwordInputRef}
+                  style={styles.input}
+                  placeholder="Password (min 6 characters)"
+                  placeholderTextColor="#A3A3A3"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
+                />
+              </Pressable>
             </View>
 
             {/* Confirm Password Field */}
@@ -177,21 +228,27 @@ export default function SignupScreen() {
                   <Text style={styles.toggleText}>{showConfirmPassword ? 'Hide' : 'Show'}</Text>
                 </TouchableOpacity>
               </View>
-              <TextInput
+              <Pressable 
                 style={[
-                  styles.input, 
-                  isConfirmPasswordFocused && styles.inputFocused
+                  styles.inputWrapper, 
+                  isConfirmPasswordFocused && styles.inputWrapperFocused
                 ]}
-                placeholder="Re-enter password"
-                placeholderTextColor="#A3A3A3"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                onFocus={() => setIsConfirmPasswordFocused(true)}
-                onBlur={() => setIsConfirmPasswordFocused(false)}
-              />
+                onPress={() => confirmPasswordInputRef.current?.focus()}
+              >
+                <TextInput
+                  ref={confirmPasswordInputRef}
+                  style={styles.input}
+                  placeholder="Re-enter password"
+                  placeholderTextColor="#A3A3A3"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onFocus={() => setIsConfirmPasswordFocused(true)}
+                  onBlur={() => setIsConfirmPasswordFocused(false)}
+                />
+              </Pressable>
             </View>
 
             {/* Submit Button */}
@@ -280,24 +337,32 @@ const styles = StyleSheet.create({
     color: '#2563EB',
     fontWeight: '600',
   },
-  input: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 8,
     paddingHorizontal: 16,
     height: 48,
+  },
+  inputWrapperFocused: {
+    borderColor: '#2563EB',
+  },
+  input: {
+    flex: 1,
+    height: 48,
     color: '#0F172A',
     fontSize: 14,
-    width: '100%',
     ...Platform.select({
       web: {
         outlineStyle: 'none' as any,
       },
     }),
   },
-  inputFocused: {
-    borderColor: '#2563EB',
+  checkmarkIcon: {
+    marginLeft: 8,
   },
   button: {
     backgroundColor: '#2563EB',

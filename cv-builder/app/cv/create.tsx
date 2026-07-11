@@ -361,20 +361,23 @@ Writing Rules:
       const companyPrompt = exp.company ? `Company: ${exp.company}` : '';
       const locationPrompt = exp.location ? `Location: ${exp.location}` : '';
 
-      const prompt = `You are a professional resume writer. Write 3-4 high-impact, professional resume accomplishment statements (bullet points) for the following job role:
+      const prompt = `You are a professional resume writer. Write exactly 4 high-impact, professional resume accomplishment statements (bullet points) for the following job role:
 ${jobTitlePrompt}
 ${companyPrompt}
 ${locationPrompt}
 
 Writing Rules:
-1. Each statement must start with a strong action verb (e.g., Developed, Led, Managed, Optimized, Created, Designed).
-2. Highlight professional achievements, responsibilities, and key skills relevant to this role.
-3. Keep each statement concise and results-oriented.
-4. Return ONLY the statements separated by a comma and a space. Do NOT use bullet points (such as "-", "•", "*"), numbers, newlines, markdown formatting, or bold text. 
-5. Do NOT include introductory or concluding remarks. Just return the comma-separated statements as a single paragraph.
+1. Write exactly 4 bullet points.
+2. Each bullet point must start with the bullet character "• " followed by a strong action verb (e.g., Developed, Led, Managed, Optimized, Created, Designed).
+3. Highlight professional achievements, responsibilities, and key accomplishments.
+4. Keep each statement concise and results-oriented.
+5. Separate each bullet point with a newline character. Return ONLY the 4 bullet points. Do NOT include introductory or concluding remarks, bold text, or markdown formatting.
 
 Example output:
-Led a team of 4 engineers to design a scalable microservices architecture, Optimized SQL queries to improve database performance by 35%, Collaborated with product owners to deliver key product features ahead of schedule`;
+• Led a team of 4 engineers to design a scalable microservices architecture.
+• Optimized SQL queries to improve database performance by 35%.
+• Collaborated with product owners to deliver key product features ahead of schedule.
+• Implemented continuous integration pipelines reducing deployment errors by 20%.`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -1287,7 +1290,7 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
             <span style="font-size: 10px; color: #64748b; font-weight: normal;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</span>
           </div>
           <div style="font-weight: bold; font-size: 10.5px; color: #64748b; margin-top: 2px; margin-bottom: 6px;">${exp.company} ${exp.location ? `• ${exp.location}` : ''}</div>
-          <div style="font-size: 11px; color: #475569; text-align: justify; line-height: 1.5;">${exp.description}</div>
+          <div style="font-size: 11px; color: #475569; text-align: justify; line-height: 1.5;">${exp.description ? exp.description.replace(/\n/g, '<br/>') : ''}</div>
         </div>
       `).join('');
 
@@ -1373,7 +1376,7 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
           <div style="font-size: 10px; color: #94a3b8; font-weight: bold; margin-bottom: 2px;">${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</div>
           <div style="font-weight: bold; font-size: 12px; color: #1e293b;">${exp.company} ${exp.location ? `• ${exp.location}` : ''}</div>
           <div style="font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-top: 2px; margin-bottom: 6px;">${exp.jobTitle}</div>
-          <div style="font-size: 11px; color: #64748b; line-height: 1.5; text-align: justify;">${exp.description}</div>
+          <div style="font-size: 11px; color: #64748b; line-height: 1.5; text-align: justify;">${exp.description ? exp.description.replace(/\n/g, '<br/>') : ''}</div>
         </div>
       `).join('');
 
@@ -1472,7 +1475,7 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
             <span style="font-size: 9.5px; font-weight: bold; color: #94a3b8;">${exp.startDate} - ${exp.current ? 'PRESENT' : exp.endDate}</span>
           </div>
           <div style="font-size: 10.5px; font-weight: 600; color: #64748b; font-style: italic; margin-bottom: 6px;">${exp.jobTitle} ${exp.location ? `• ${exp.location}` : ''}</div>
-          <div style="font-size: 11px; color: #475569; line-height: 1.5; text-align: justify;">${exp.description}</div>
+          <div style="font-size: 11px; color: #475569; line-height: 1.5; text-align: justify;">${exp.description ? exp.description.replace(/\n/g, '<br/>') : ''}</div>
         </div>
       `).join('');
 
@@ -2762,7 +2765,11 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0} 
+        className="flex-1"
+      >
         {/* 2. Switcher */}
         <View className="px-6 py-4 bg-white border-b border-gray-50">
           <View className="bg-gray-100 p-1 rounded-2xl flex-row items-center justify-between">
@@ -2808,7 +2815,12 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
             </View>
 
             {/* 4. Form Panels */}
-            <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              className="flex-1 px-6 pt-6" 
+              showsVerticalScrollIndicator={false} 
+              keyboardShouldPersistTaps="handled"
+              automaticallyAdjustKeyboardInsets={true}
+            >
               
               {/* TAB: PERSONAL */}
               {activeTab === 'PERSONAL' && (
@@ -3115,7 +3127,7 @@ Led a team of 4 engineers to design a scalable microservices architecture, Optim
                             textAlignVertical="top" 
                           />
                           <Text className="text-[9px] text-gray-400 mt-1 leading-normal">
-                            For best results in preview, separate bullet points with commas or write one continuous paragraph depending on template.
+                            Separate bullet points with a newline. The AI will generate exactly 4 high-impact bulleted points starting with "•".
                           </Text>
                         </View>
                       </View>

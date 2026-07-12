@@ -270,6 +270,14 @@ export default function CreateCVScreen() {
       return;
     }
 
+    if (!personalInfo.jobTitle.trim() && skills.length === 0 && experiences.length === 0 && educations.length === 0) {
+      Alert.alert(
+        'Details Required',
+        'Please enter your Job Title, Skills, Experience, or Education details first so the AI has information to write a tailored summary.'
+      );
+      return;
+    }
+
     try {
       setIsGeneratingSummary(true);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

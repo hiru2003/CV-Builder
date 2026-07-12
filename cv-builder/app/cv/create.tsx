@@ -260,6 +260,154 @@ export default function CreateCVScreen() {
     setCustomSectionItems(customSectionItems.filter(item => item.id !== id));
   };
 
+  // --- Load Demo Data Helper for Auto-fill ---
+  const loadDemoData = async () => {
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      setPersonalInfo({
+        fullName: 'John Doe',
+        jobTitle: 'Senior Software Engineer',
+        email: 'john.doe@example.com',
+        phone: '+1 (555) 019-2834',
+        address: 'San Francisco, CA',
+        linkedin: 'linkedin.com/in/johndoe',
+        github: 'github.com/johndoe'
+      });
+
+      // Mark personal info fields as blurred/completed to show green validation checkmarks
+      setFullNameBlurred(true);
+      setJobTitleBlurred(true);
+      setEmailBlurred(true);
+      setPhoneBlurred(true);
+      setAddressBlurred(true);
+      setLinkedinBlurred(true);
+      setGithubBlurred(true);
+
+      setSkills([
+        'React Native',
+        'TypeScript',
+        'JavaScript',
+        'Node.js',
+        'Redux Toolkit',
+        'REST APIs',
+        'Git & GitHub',
+        'Amazon Web Services (AWS)'
+      ]);
+
+      setExperiences([
+        {
+          id: 'demo-exp-1',
+          jobTitle: 'Senior Software Engineer',
+          company: 'Google',
+          startDate: 'Jan 2022',
+          endDate: 'Present',
+          current: true,
+          location: 'Mountain View, CA',
+          description: '• Led a team of 4 engineers to design and deploy a scalable microservices architecture.\n• Optimized database query speeds by 35% using advanced indexing and caching layers.\n• Collaborated with product owners to deliver key cloud features ahead of schedule.\n• Integrated continuous integration pipelines reducing release deployment errors by 20%.'
+        },
+        {
+          id: 'demo-exp-2',
+          jobTitle: 'Software Developer',
+          company: 'TechCorp Solutions',
+          startDate: 'Mar 2019',
+          endDate: 'Dec 2021',
+          current: false,
+          location: 'San Francisco, CA',
+          description: '• Developed responsive React Native mobile applications for both iOS and Android platforms.\n• Maintained 99.9% app uptime by diagnosing and resolving performance bottlenecks.\n• Collaborated with backend developers to design robust REST API integrations.'
+        }
+      ]);
+
+      setEducations([
+        {
+          id: 'demo-edu-1',
+          degree: 'Bachelor of Science',
+          school: 'Stanford University',
+          startDate: 'Sep 2015',
+          endDate: 'June 2019',
+          current: false,
+          fieldOfStudy: 'Computer Science',
+          gpa: '3.8/4.0'
+        }
+      ]);
+
+      setSummary('Experienced Senior Software Engineer with a proven track record of designing and implementing high-performance mobile and web applications. Skilled in React Native, TypeScript, Node.js, and cloud architectures. Passionate about leading development teams, optimizing workflows, and delivering user-centric products that drive growth.');
+
+      setLanguages([
+        { id: 'demo-lang-1', name: 'English', level: 'Native' },
+        { id: 'demo-lang-2', name: 'Spanish', level: 'Conversational' }
+      ]);
+      setShowLanguages(true);
+
+      Alert.alert(
+        'Demo Data Loaded',
+        'The resume details have been populated with professional sample data.',
+        [{ text: 'OK' }]
+      );
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (err) {
+      console.error('Error loading demo data:', err);
+    }
+  };
+
+  // --- Reset Form Helper for Clearing Details ---
+  const handleResetForm = () => {
+    Alert.alert(
+      'Reset Form',
+      'Are you sure you want to clear all CV details? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              
+              // Clear state variables
+              setPersonalInfo({ fullName: '', jobTitle: '', email: '', phone: '', address: '', linkedin: '', github: '' });
+              setPhotoInfo(null);
+              setSummary('');
+              setExperiences([]);
+              setEducations([]);
+              setSkills([]);
+              setLanguages([]);
+              setCertifications([]);
+              setAwards([]);
+              setWebsites([]);
+              setReferences([]);
+              setHobbies([]);
+              setCustomSectionItems([]);
+              
+              // Reset visibility toggles
+              setShowLanguages(false);
+              setShowCertifications(false);
+              setShowAwards(false);
+              setShowWebsites(false);
+              setShowReferences(false);
+              
+              // Reset input blur validations
+              setFullNameBlurred(false);
+              setJobTitleBlurred(false);
+              setEmailBlurred(false);
+              setPhoneBlurred(false);
+              setAddressBlurred(false);
+              setLinkedinBlurred(false);
+              setGithubBlurred(false);
+
+              // Set active tab back to PERSONAL
+              setActiveTab('PERSONAL');
+              
+              await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            } catch (err) {
+              console.error('Error resetting form:', err);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   // --- AI Summary Generator Handler ---
   const generateSummaryWithAI = async (providedKey?: string) => {
     const apiKey = providedKey || customApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY;
@@ -2750,13 +2898,31 @@ Example output:
     <SafeAreaView className="flex-1 bg-white">
       {/* 1. Header Bar */}
       <View className="flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
-        <TouchableOpacity 
-          onPress={() => router.back()} 
-          className="flex-row items-center border border-gray-200 rounded-full px-4 py-2 bg-white"
-        >
-          <Ionicons name="chevron-back" size={14} color="#4B5563" />
-          <Text className="text-xs font-bold text-gray-500 ml-1">BACK</Text>
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-2">
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            className="flex-row items-center border border-gray-200 rounded-full px-4 py-2 bg-white"
+          >
+            <Ionicons name="chevron-back" size={14} color="#4B5563" />
+            <Text className="text-xs font-bold text-gray-500 ml-1">BACK</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={loadDemoData} 
+            className="flex-row items-center border border-blue-200 rounded-full px-4 py-2 bg-blue-50"
+          >
+            <Ionicons name="sparkles" size={12} color="#2563EB" />
+            <Text className="text-[10px] font-bold text-blue-600 ml-1">DEMO DATA</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={handleResetForm} 
+            className="flex-row items-center border border-red-200 rounded-full px-4 py-2 bg-red-50"
+          >
+            <Ionicons name="trash-outline" size={12} color="#DC2626" />
+            <Text className="text-[10px] font-bold text-red-600 ml-1">RESET</Text>
+          </TouchableOpacity>
+        </View>
         
         <TouchableOpacity 
           onPress={handleDownload} 

@@ -524,16 +524,15 @@ ${locationPrompt}
 
 Writing Rules:
 1. Write exactly 4 bullet points.
-2. Each bullet point must start with the bullet character "• " followed by a strong action verb (e.g., Developed, Led, Managed, Optimized, Created, Designed).
-3. Highlight professional achievements, responsibilities, and key accomplishments.
-4. Keep each statement concise and results-oriented.
-5. Separate each bullet point with a newline character. Return ONLY the 4 bullet points. Do NOT include introductory or concluding remarks, bold text, or markdown formatting.
+2. Each bullet point must start with the bullet character "• " followed by a strong action verb (e.g., Led, Optimized, Designed, Built).
+3. Keep each bullet point extremely short. Each statement must contain a MAXIMUM of 6 to 7 words.
+4. Separate each bullet point with a newline character. Return ONLY the 4 bullet points. Do NOT include introductory or concluding remarks, bold text, or markdown formatting.
 
 Example output:
-• Led a team of 4 engineers to design a scalable microservices architecture.
-• Optimized SQL queries to improve database performance by 35%.
-• Collaborated with product owners to deliver key product features ahead of schedule.
-• Implemented continuous integration pipelines reducing deployment errors by 20%.`;
+• Led team of four software engineers.
+• Optimized query speeds by 35 percent.
+• Delivered critical product features early.
+• Reduced server latency and hosting costs.`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',

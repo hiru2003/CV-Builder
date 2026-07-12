@@ -1291,7 +1291,7 @@ Example output:
       `).join('');
 
       const expListHTML = experiences.map(exp => `
-        <div style="position: relative; padding-left: 18px; border-left: 1.5px solid ${accentColor}; margin-bottom: 18px;">
+        <div style="position: relative; padding-left: 18px; border-left: 1.5px solid #e2e8f0; margin-bottom: 18px;">
           <div style="position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: ${accentColor}; border: 1.5px solid white; left: -5px; top: 4px; box-shadow: 0 0 0 1px ${accentColor};"></div>
           <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; color: #1e293b;">
             <span>${exp.jobTitle}</span>
@@ -1331,6 +1331,7 @@ Example output:
                 ${personalInfo.email ? `<div class="contact-item"><span class="contact-icon">✉</span>${personalInfo.email}</div>` : ''}
                 ${personalInfo.address ? `<div class="contact-item"><span class="contact-icon">📍</span>${personalInfo.address}</div>` : ''}
                 ${personalInfo.linkedin ? `<div class="contact-item"><span class="contact-icon">🌐</span>${personalInfo.linkedin}</div>` : ''}
+                ${personalInfo.github ? `<div class="contact-item"><span class="contact-icon">💻</span>${personalInfo.github}</div>` : ''}
               </div>
               ${skills.length > 0 ? `<div class="section-title">Skills</div><div style="margin-top: 8px;">${skillsListHTML}</div>` : ''}
               ${showLanguages && languages.length > 0 ? `<div class="section-title">Languages</div><div style="margin-top: 8px;">${langListHTML}</div>` : ''}

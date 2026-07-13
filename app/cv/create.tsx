@@ -3304,7 +3304,7 @@ Example output:
                             textAlignVertical="top" 
                           />
                           <Text className="text-[9px] text-gray-400 mt-1 leading-normal">
-                            Separate bullet points with a newline. The AI will generate exactly 4 high-impact bulleted points starting with "•".
+                            Separate bullet points with a newline. The AI will generate exactly 4 high-impact bulleted points starting with &quot;•&quot;.
                           </Text>
                         </View>
                       </View>

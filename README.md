@@ -38,7 +38,8 @@ To launch the Expo development server, run:
 npx expo start
 ```
 
-Use the terminal interactive commands to open the application:
-* Press **`a`** for Android Emulator/device.
-* Press **`i`** for iOS Simulator/device.
-* Press **`w`** to run on Web.
+Use the terminal interactive commands or scan the QR code to open the application:
+* Scan the QR code in the terminal using the **Expo Go** app (Android) or the native **Camera app** (iOS) to run on a physical device.
+* Press **`a`** to run on an Android Emulator or connected device.
+* Press **`i`** to run on an iOS Simulator.
+* Press **`w`** to run on a Web browser.

@@ -1,50 +1,44 @@
-# Welcome to your Expo app 👋
+# CV Builder 📝
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A premium, cross-platform mobile application built with **React Native** and **Expo** that helps users create professional, high-impact CVs/resumes. The app leverages AI to automatically generate summaries and refine experience points.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Key Features
 
-   ```bash
-   npm install
-   ```
+* **AI-Powered Generation**: Instantly generate high-quality CV summaries and professional, actionable experience bullet points using the Google Gemini API.
+* **Templates**: Select from beautifully designed templates (Jonathan, Mariana, Richard).
+* **Multi-Platform Support**: Works on Android, iOS, and Web.
+* **Authentication & Storage**: Fully integrated with Firebase for user authentication and data persistence.
+* **PDF Export**: Generate, preview, and share high-quality PDF copies of your CV.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ Setup & Running Instructions
 
-In the output, you'll find options to open the app in a
+### Prerequisites
+* Ensure you have [Node.js](https://nodejs.org/) installed.
+* Install the **Expo Go** app on your iOS/Android device, or set up simulators (Android Studio / Xcode).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### 1. Install Dependencies
+In the root directory, run:
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Configure Environment Variables
+Create or update a `.env` file in the root directory and add your Google Gemini API key:
+```env
+EXPO_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-## Learn more
+### 3. Start the Application
+To launch the Expo development server, run:
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Use the terminal interactive commands to open the application:
+* Press **`a`** for Android Emulator/device.
+* Press **`i`** for iOS Simulator/device.
+* Press **`w`** to run on Web.

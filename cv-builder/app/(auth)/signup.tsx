@@ -20,6 +20,12 @@ export default function SignupScreen() {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false);
+  
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
   const router = useRouter();
 
   const fullNameInputRef = useRef<TextInput>(null);
@@ -45,28 +51,48 @@ export default function SignupScreen() {
   };
 
   const handleSignup = async () => {
-    if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Validation Error', 'Please fill in all fields');
-      return;
+    let hasError = false;
+    setNameError('');
+    setEmailError('');
+    setPasswordError('');
+    setConfirmPasswordError('');
+
+    if (!fullName) {
+      setNameError('Please enter your full name');
+      hasError = true;
+    } else if (!validateFullName(fullName)) {
+      setNameError('Full Name must be at least 3 characters');
+      hasError = true;
     }
 
-    if (!validateFullName(fullName)) {
-      Alert.alert('Validation Error', 'Full Name must be at least 3 characters');
-      return;
+    if (!email) {
+      setEmailError('Please enter your email');
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
     }
 
-    if (!validateEmail(email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
-      return;
+    if (!password) {
+      setPasswordError('Please enter your password');
+      hasError = true;
+    } else if (!validatePassword(password)) {
+      setPasswordError('Password should be at least 6 characters');
+      hasError = true;
     }
 
-    if (!validatePassword(password)) {
-      Alert.alert('Validation Error', 'Password should be at least 6 characters');
-      return;
+    if (!confirmPassword) {
+      setConfirmPasswordError('Please confirm your password');
+      hasError = true;
+    } else if (!validateConfirmPassword(confirmPassword, password)) {
+      setConfirmPasswordError('Passwords do not match');
+      hasError = true;
     }
 
-    if (!validateConfirmPassword(confirmPassword, password)) {
-      Alert.alert('Validation Error', 'Passwords do not match');
+    if (hasError) {
+      try {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } catch (e) {}
       return;
     }
 
@@ -144,7 +170,8 @@ export default function SignupScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isNameFocused && styles.inputWrapperFocused
+                  isNameFocused && styles.inputWrapperFocused,
+                  !!nameError && styles.inputWrapperError
                 ]}
                 onPress={() => fullNameInputRef.current?.focus()}
               >
@@ -152,15 +179,19 @@ export default function SignupScreen() {
                   ref={fullNameInputRef}
                   style={styles.input}
                   placeholder="John Doe"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={fullName}
-                  onChangeText={setFullName}
+                  onChangeText={(val) => {
+                    setFullName(val);
+                    if (nameError) setNameError('');
+                  }}
                   autoCapitalize="words"
                   autoCorrect={false}
                   onFocus={() => setIsNameFocused(true)}
                   onBlur={() => setIsNameFocused(false)}
                 />
               </Pressable>
+              {!!nameError && <Text style={styles.errorText}>{nameError}</Text>}
             </View>
 
             {/* Email Field */}
@@ -169,7 +200,8 @@ export default function SignupScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isEmailFocused && styles.inputWrapperFocused
+                  isEmailFocused && styles.inputWrapperFocused,
+                  !!emailError && styles.inputWrapperError
                 ]}
                 onPress={() => emailInputRef.current?.focus()}
               >
@@ -177,9 +209,12 @@ export default function SignupScreen() {
                   ref={emailInputRef}
                   style={styles.input}
                   placeholder="name@example.com"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(val) => {
+                    setEmail(val);
+                    if (emailError) setEmailError('');
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -187,6 +222,7 @@ export default function SignupScreen() {
                   onBlur={() => setIsEmailFocused(false)}
                 />
               </Pressable>
+              {!!emailError && <Text style={styles.errorText}>{emailError}</Text>}
             </View>
 
             {/* Password Field */}
@@ -200,7 +236,8 @@ export default function SignupScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isPasswordFocused && styles.inputWrapperFocused
+                  isPasswordFocused && styles.inputWrapperFocused,
+                  !!passwordError && styles.inputWrapperError
                 ]}
                 onPress={() => passwordInputRef.current?.focus()}
               >
@@ -208,9 +245,12 @@ export default function SignupScreen() {
                   ref={passwordInputRef}
                   style={styles.input}
                   placeholder="Password (min 6 characters)"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(val) => {
+                    setPassword(val);
+                    if (passwordError) setPasswordError('');
+                  }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -218,6 +258,7 @@ export default function SignupScreen() {
                   onBlur={() => setIsPasswordFocused(false)}
                 />
               </Pressable>
+              {!!passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
             </View>
 
             {/* Confirm Password Field */}
@@ -231,7 +272,8 @@ export default function SignupScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isConfirmPasswordFocused && styles.inputWrapperFocused
+                  isConfirmPasswordFocused && styles.inputWrapperFocused,
+                  !!confirmPasswordError && styles.inputWrapperError
                 ]}
                 onPress={() => confirmPasswordInputRef.current?.focus()}
               >
@@ -239,9 +281,12 @@ export default function SignupScreen() {
                   ref={confirmPasswordInputRef}
                   style={styles.input}
                   placeholder="Re-enter password"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={confirmPassword}
-                  onChangeText={setConfirmPassword}
+                  onChangeText={(val) => {
+                    setConfirmPassword(val);
+                    if (confirmPasswordError) setConfirmPasswordError('');
+                  }}
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -249,6 +294,7 @@ export default function SignupScreen() {
                   onBlur={() => setIsConfirmPasswordFocused(false)}
                 />
               </Pressable>
+              {!!confirmPasswordError && <Text style={styles.errorText}>{confirmPasswordError}</Text>}
             </View>
 
             {/* Submit Button */}
@@ -350,6 +396,9 @@ const styles = StyleSheet.create({
   inputWrapperFocused: {
     borderColor: '#2563EB',
   },
+  inputWrapperError: {
+    borderColor: '#EF4444',
+  },
   input: {
     flex: 1,
     height: 48,
@@ -380,6 +429,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',

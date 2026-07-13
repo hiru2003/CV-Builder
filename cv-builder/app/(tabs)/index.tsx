@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   welcomeText: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#94A3B8',
     fontWeight: '600',
     textTransform: 'uppercase',

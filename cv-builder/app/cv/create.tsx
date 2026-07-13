@@ -2896,36 +2896,36 @@ Example output:
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* 1. Header Bar */}
-      <View className="flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
-        <View className="flex-row items-center gap-2">
+      <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-100 bg-white">
+        <View className="flex-row items-center gap-1.5">
           <TouchableOpacity 
             onPress={() => router.back()} 
-            className="flex-row items-center border border-gray-200 rounded-full px-4 py-2 bg-white"
+            className="flex-row items-center border border-gray-200 rounded-full px-2.5 py-1.5 bg-white"
           >
-            <Ionicons name="chevron-back" size={14} color="#4B5563" />
-            <Text className="text-xs font-bold text-gray-500 ml-1">BACK</Text>
+            <Ionicons name="chevron-back" size={12} color="#4B5563" />
+            <Text className="text-[9px] font-bold text-gray-500 ml-0.5">BACK</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={loadDemoData} 
-            className="flex-row items-center border border-blue-200 rounded-full px-4 py-2 bg-blue-50"
+            className="flex-row items-center border border-blue-200 rounded-full px-2.5 py-1.5 bg-blue-50"
           >
-            <Ionicons name="sparkles" size={12} color="#2563EB" />
-            <Text className="text-[10px] font-bold text-blue-600 ml-1">DEMO DATA</Text>
+            <Ionicons name="sparkles" size={10} color="#2563EB" />
+            <Text className="text-[9px] font-bold text-blue-600 ml-0.5">DEMO</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             onPress={handleResetForm} 
-            className="flex-row items-center border border-red-200 rounded-full px-4 py-2 bg-red-50"
+            className="flex-row items-center border border-red-200 rounded-full px-2.5 py-1.5 bg-red-50"
           >
-            <Ionicons name="trash-outline" size={12} color="#DC2626" />
-            <Text className="text-[10px] font-bold text-red-600 ml-1">RESET</Text>
+            <Ionicons name="trash-outline" size={10} color="#DC2626" />
+            <Text className="text-[9px] font-bold text-red-600 ml-0.5">RESET</Text>
           </TouchableOpacity>
         </View>
         
         <TouchableOpacity 
           onPress={handleDownload} 
-          className="flex-row items-center bg-[#2563EB] rounded-full px-5 py-2.5"
+          className="flex-row items-center bg-[#2563EB] rounded-full px-3.5 py-2"
           style={{
             shadowColor: '#2563eb',
             shadowOffset: { width: 0, height: 3 },
@@ -2934,8 +2934,8 @@ Example output:
             elevation: 3,
           }}
         >
-          <Ionicons name="download-outline" size={16} color="white" />
-          <Text className="text-xs font-bold text-white ml-1.5">DOWNLOAD</Text>
+          <Ionicons name="download-outline" size={14} color="white" />
+          <Text className="text-[10px] font-bold text-white ml-1">DOWNLOAD</Text>
         </TouchableOpacity>
       </View>
 
@@ -2945,28 +2945,31 @@ Example output:
         className="flex-1"
       >
         {/* 2. Switcher */}
-        <View className="px-6 py-4 bg-white border-b border-gray-50">
-          <View className="bg-gray-100 p-1 rounded-2xl flex-row items-center justify-between">
-            <TouchableOpacity 
-              onPress={() => setActiveMode('edit')}
-              className={activeMode === 'edit' ? "flex-1 py-3 items-center rounded-xl bg-white" : "flex-1 py-3 items-center rounded-xl"}
-              style={activeMode === 'edit' ? styles.tabActiveShadow : undefined}
-            >
-              <Text className={activeMode === 'edit' ? "font-bold text-sm text-gray-900" : "font-bold text-sm text-gray-400"}>Edit Form</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => setActiveMode('preview')}
-              className={activeMode === 'preview' ? "flex-1 py-3 items-center rounded-xl bg-white" : "flex-1 py-3 items-center rounded-xl"}
-              style={activeMode === 'preview' ? styles.tabActiveShadow : undefined}
-            >
-              <Text className={activeMode === 'preview' ? "font-bold text-sm text-gray-900" : "font-bold text-sm text-gray-400"}>Live Preview</Text>
-            </TouchableOpacity>
+        {Platform.OS !== 'web' && (
+          <View className="px-6 py-4 bg-white border-b border-gray-50">
+            <View className="bg-gray-100 p-1 rounded-2xl flex-row items-center justify-between">
+              <TouchableOpacity 
+                onPress={() => setActiveMode('edit')}
+                className={activeMode === 'edit' ? "flex-1 py-3 items-center rounded-xl bg-white" : "flex-1 py-3 items-center rounded-xl"}
+                style={activeMode === 'edit' ? styles.tabActiveShadow : undefined}
+              >
+                <Text className={activeMode === 'edit' ? "font-bold text-sm text-gray-900" : "font-bold text-sm text-gray-400"}>Edit Form</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={() => setActiveMode('preview')}
+                className={activeMode === 'preview' ? "flex-1 py-3 items-center rounded-xl bg-white" : "flex-1 py-3 items-center rounded-xl"}
+                style={activeMode === 'preview' ? styles.tabActiveShadow : undefined}
+              >
+                <Text className={activeMode === 'preview' ? "font-bold text-sm text-gray-900" : "font-bold text-sm text-gray-400"}>Live Preview</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
-        {activeMode === 'edit' ? (
-          <View className="flex-1 bg-white">
+        <View style={Platform.OS === 'web' ? { flex: 1, flexDirection: 'row', backgroundColor: '#F8FAFC' } : { flex: 1 }}>
+          {(activeMode === 'edit' || Platform.OS === 'web') && (
+            <View style={Platform.OS === 'web' ? { width: '50%', backgroundColor: '#FFFFFF', borderRightWidth: 1, borderColor: '#E2E8F0' } : { flex: 1, backgroundColor: '#FFFFFF' }}>
             {/* 3. Horizontal Scrollable Tabs */}
             <View className="px-6 py-3 border-b border-gray-100 bg-white">
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -3042,7 +3045,7 @@ Example output:
                       <TextInput 
                         className="flex-1 text-gray-900 font-medium p-0" 
                         placeholder="e.g. John Doe" 
-                        placeholderTextColor="#9CA3AF" 
+                        placeholderTextColor="#64748B" 
                         value={personalInfo.fullName} 
                         onChangeText={t => setPersonalInfo({...personalInfo, fullName: t})} 
                         onFocus={() => setIsFullNameFocused(true)}
@@ -3064,7 +3067,7 @@ Example output:
                       <TextInput 
                         className="flex-1 text-gray-900 font-medium p-0" 
                         placeholder="e.g. Software Engineer" 
-                        placeholderTextColor="#9CA3AF" 
+                        placeholderTextColor="#64748B" 
                         value={personalInfo.jobTitle} 
                         onChangeText={t => setPersonalInfo({...personalInfo, jobTitle: t})} 
                         onFocus={() => setIsJobTitleFocused(true)}
@@ -3086,7 +3089,7 @@ Example output:
                       <TextInput 
                         className="flex-1 text-gray-900 font-medium p-0" 
                         placeholder="john@example.com" 
-                        placeholderTextColor="#9CA3AF" 
+                        placeholderTextColor="#64748B" 
                         value={personalInfo.email} 
                         onChangeText={t => setPersonalInfo({...personalInfo, email: t})} 
                         keyboardType="email-address" 
@@ -3110,7 +3113,7 @@ Example output:
                       <TextInput 
                         className="flex-1 text-gray-900 font-medium p-0" 
                         placeholder="+1 234 567 890" 
-                        placeholderTextColor="#9CA3AF" 
+                        placeholderTextColor="#64748B" 
                         value={personalInfo.phone} 
                         onChangeText={t => setPersonalInfo({...personalInfo, phone: t})} 
                         keyboardType="phone-pad" 
@@ -3133,7 +3136,7 @@ Example output:
                       <TextInput 
                         className="flex-1 text-gray-900 font-medium p-0" 
                         placeholder="City, Country" 
-                        placeholderTextColor="#9CA3AF" 
+                        placeholderTextColor="#64748B" 
                         value={personalInfo.address} 
                         onChangeText={t => setPersonalInfo({...personalInfo, address: t})} 
                         onFocus={() => setIsAddressFocused(true)}
@@ -3156,7 +3159,7 @@ Example output:
                         <TextInput 
                           className="flex-1 text-gray-900 font-medium text-sm p-0" 
                           placeholder="linkedin.com/in/johndoe" 
-                          placeholderTextColor="#9CA3AF" 
+                          placeholderTextColor="#64748B" 
                           value={personalInfo.linkedin} 
                           onChangeText={t => setPersonalInfo({...personalInfo, linkedin: t})} 
                           autoCapitalize="none" 
@@ -3178,7 +3181,7 @@ Example output:
                         <TextInput 
                           className="flex-1 text-gray-900 font-medium text-sm p-0" 
                           placeholder="github.com/johndoe" 
-                          placeholderTextColor="#9CA3AF" 
+                          placeholderTextColor="#64748B" 
                           value={personalInfo.github} 
                           onChangeText={t => setPersonalInfo({...personalInfo, github: t})} 
                           autoCapitalize="none" 
@@ -3232,18 +3235,18 @@ Example output:
                         <View className="flex-row gap-4">
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Company</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Google" placeholderTextColor="#9CA3AF" value={exp.company} onChangeText={t => updateExperience(exp.id, 'company', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Google" placeholderTextColor="#64748B" value={exp.company} onChangeText={t => updateExperience(exp.id, 'company', t)} />
                           </View>
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Position</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Senior Developer" placeholderTextColor="#9CA3AF" value={exp.jobTitle} onChangeText={t => updateExperience(exp.id, 'jobTitle', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Senior Developer" placeholderTextColor="#64748B" value={exp.jobTitle} onChangeText={t => updateExperience(exp.id, 'jobTitle', t)} />
                           </View>
                         </View>
 
                         <View className="flex-row gap-4 items-end">
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Start Date</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Jan 2020" placeholderTextColor="#9CA3AF" value={exp.startDate} onChangeText={t => updateExperience(exp.id, 'startDate', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Jan 2020" placeholderTextColor="#64748B" value={exp.startDate} onChangeText={t => updateExperience(exp.id, 'startDate', t)} />
                           </View>
                           <View className="flex-1">
                             <TouchableOpacity 
@@ -3260,7 +3263,7 @@ Example output:
                             <TextInput 
                               className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" 
                               placeholder="e.g. Present" 
-                              placeholderTextColor="#9CA3AF" 
+                              placeholderTextColor="#64748B" 
                               value={exp.current ? 'Present' : exp.endDate} 
                               onChangeText={t => updateExperience(exp.id, 'endDate', t)} 
                               editable={!exp.current} 
@@ -3270,7 +3273,7 @@ Example output:
 
                         <View>
                           <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Location</Text>
-                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. New York, NY" placeholderTextColor="#9CA3AF" value={exp.location} onChangeText={t => updateExperience(exp.id, 'location', t)} />
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. New York, NY" placeholderTextColor="#64748B" value={exp.location} onChangeText={t => updateExperience(exp.id, 'location', t)} />
                         </View>
 
                         <View>
@@ -3294,7 +3297,7 @@ Example output:
                           <TextInput 
                             className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium min-h-[100px]" 
                             placeholder="Led a team of 5 developers..., Implemented CI/CD pipelines..." 
-                            placeholderTextColor="#9CA3AF"
+                            placeholderTextColor="#64748B"
                             value={exp.description} 
                             onChangeText={t => updateExperience(exp.id, 'description', t)} 
                             multiline 
@@ -3353,24 +3356,24 @@ Example output:
                       <View className="space-y-4 gap-3">
                         <View>
                           <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Institution</Text>
-                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Harvard University" placeholderTextColor="#9CA3AF" value={edu.school} onChangeText={t => updateEducation(edu.id, 'school', t)} />
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Harvard University" placeholderTextColor="#64748B" value={edu.school} onChangeText={t => updateEducation(edu.id, 'school', t)} />
                         </View>
 
                         <View className="flex-row gap-4">
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Degree</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Bachelor of Science" placeholderTextColor="#9CA3AF" value={edu.degree} onChangeText={t => updateEducation(edu.id, 'degree', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Bachelor of Science" placeholderTextColor="#64748B" value={edu.degree} onChangeText={t => updateEducation(edu.id, 'degree', t)} />
                           </View>
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Field of Study</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Computer Science" placeholderTextColor="#9CA3AF" value={edu.fieldOfStudy} onChangeText={t => updateEducation(edu.id, 'fieldOfStudy', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Computer Science" placeholderTextColor="#64748B" value={edu.fieldOfStudy} onChangeText={t => updateEducation(edu.id, 'fieldOfStudy', t)} />
                           </View>
                         </View>
 
                         <View className="flex-row gap-4 items-end">
                           <View className="flex-1">
                             <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Start Date</Text>
-                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Sep 2018" placeholderTextColor="#9CA3AF" value={edu.startDate} onChangeText={t => updateEducation(edu.id, 'startDate', t)} />
+                            <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. Sep 2018" placeholderTextColor="#64748B" value={edu.startDate} onChangeText={t => updateEducation(edu.id, 'startDate', t)} />
                           </View>
                           <View className="flex-1">
                             <TouchableOpacity 
@@ -3387,7 +3390,7 @@ Example output:
                             <TextInput 
                               className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" 
                               placeholder="e.g. May 2022" 
-                              placeholderTextColor="#9CA3AF" 
+                              placeholderTextColor="#64748B" 
                               value={edu.current ? 'Present' : edu.endDate} 
                               onChangeText={t => updateEducation(edu.id, 'endDate', t)} 
                               editable={!edu.current}
@@ -3397,7 +3400,7 @@ Example output:
 
                         <View>
                           <Text className="text-[10px] font-bold text-gray-500 mb-1 uppercase">Score / GPA (Optional)</Text>
-                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. 3.8/4.0" placeholderTextColor="#9CA3AF" value={edu.gpa} onChangeText={t => updateEducation(edu.id, 'gpa', t)} />
+                          <TextInput className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3.5 text-gray-900 font-medium" placeholder="e.g. 3.8/4.0" placeholderTextColor="#64748B" value={edu.gpa} onChangeText={t => updateEducation(edu.id, 'gpa', t)} />
                         </View>
                       </View>
                     </View>
@@ -3432,7 +3435,7 @@ Example output:
                     <TextInput 
                       className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium" 
                       placeholder="e.g. React.js (Press Enter to add)" 
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor="#64748B"
                       value={newSkill} 
                       onChangeText={setNewSkill} 
                       onSubmitEditing={addSkill} 
@@ -3491,7 +3494,7 @@ Example output:
                     <TextInput 
                       className="bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-4 py-4 text-gray-900 font-medium min-h-[160px]" 
                       placeholder="Experienced software engineer with a passion for building scalable web applications..." 
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor="#64748B"
                       value={summary} 
                       onChangeText={setSummary} 
                       multiline 
@@ -3715,7 +3718,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. French" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={lang.name} 
                                   onChangeText={t => updateLanguage(lang.id, 'name', t)} 
                                 />
@@ -3725,7 +3728,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Fluent / C1" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={lang.level} 
                                   onChangeText={t => updateLanguage(lang.id, 'level', t)} 
                                 />
@@ -3770,7 +3773,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. AWS Certified Solutions Architect" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={cert.name} 
                                   onChangeText={t => updateCertification(cert.id, 'name', t)} 
                                 />
@@ -3781,7 +3784,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. Amazon Web Services" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={cert.issuer} 
                                     onChangeText={t => updateCertification(cert.id, 'issuer', t)} 
                                   />
@@ -3791,7 +3794,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. 2024" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={cert.date} 
                                     onChangeText={t => updateCertification(cert.id, 'date', t)} 
                                   />
@@ -3837,7 +3840,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Employee of the Year" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={aw.title} 
                                   onChangeText={t => updateAward(aw.id, 'title', t)} 
                                 />
@@ -3848,7 +3851,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. Acme Corporation" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={aw.issuer} 
                                     onChangeText={t => updateAward(aw.id, 'issuer', t)} 
                                   />
@@ -3858,7 +3861,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. 2023" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={aw.date} 
                                     onChangeText={t => updateAward(aw.id, 'date', t)} 
                                   />
@@ -3869,7 +3872,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Selected from over 200 staff..." 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={aw.description} 
                                   onChangeText={t => updateAward(aw.id, 'description', t)} 
                                 />
@@ -3914,7 +3917,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Portfolio" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={web.label} 
                                   onChangeText={t => updateWebsite(web.id, 'label', t)} 
                                 />
@@ -3924,7 +3927,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. portfolio.com" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={web.url} 
                                   onChangeText={t => updateWebsite(web.id, 'url', t)} 
                                   autoCapitalize="none"
@@ -3971,7 +3974,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. Jane Smith" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={ref.name} 
                                     onChangeText={t => updateReference(ref.id, 'name', t)} 
                                   />
@@ -3981,7 +3984,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="e.g. Manager" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={ref.relationship} 
                                     onChangeText={t => updateReference(ref.id, 'relationship', t)} 
                                   />
@@ -3992,7 +3995,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Google LLC" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={ref.company} 
                                   onChangeText={t => updateReference(ref.id, 'company', t)} 
                                 />
@@ -4003,7 +4006,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="janesmith@google.com" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={ref.email} 
                                     onChangeText={t => updateReference(ref.id, 'email', t)} 
                                     keyboardType="email-address"
@@ -4015,7 +4018,7 @@ Example output:
                                   <TextInput 
                                     className="bg-white border border-gray-255 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                     placeholder="+1 555 123 456" 
-                                    placeholderTextColor="#9CA3AF"
+                                    placeholderTextColor="#64748B"
                                     value={ref.phone} 
                                     onChangeText={t => updateReference(ref.id, 'phone', t)} 
                                     keyboardType="phone-pad"
@@ -4054,7 +4057,7 @@ Example output:
                             <TextInput 
                               className="flex-1 bg-white border border-gray-250 rounded-2xl px-4 py-3 text-sm text-gray-900 font-medium" 
                               placeholder="e.g. Photography (Press Add)" 
-                              placeholderTextColor="#9CA3AF"
+                              placeholderTextColor="#64748B"
                               value={newHobby} 
                               onChangeText={setNewHobby} 
                               onSubmitEditing={addHobby} 
@@ -4115,7 +4118,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Project Name / Volunteer Role" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={item.title} 
                                   onChangeText={t => updateCustomSectionItem(item.id, 'title', t)} 
                                 />
@@ -4125,7 +4128,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Red Cross (2020 - 2022)" 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={item.subtitle} 
                                   onChangeText={t => updateCustomSectionItem(item.id, 'subtitle', t)} 
                                 />
@@ -4135,7 +4138,7 @@ Example output:
                                 <TextInput 
                                   className="bg-white border border-gray-250 rounded-xl px-3 py-2 text-sm text-gray-800" 
                                   placeholder="e.g. Key achievements and duties..." 
-                                  placeholderTextColor="#9CA3AF"
+                                  placeholderTextColor="#64748B"
                                   value={item.description} 
                                   onChangeText={t => updateCustomSectionItem(item.id, 'description', t)} 
                                   multiline
@@ -4233,7 +4236,7 @@ Example output:
                           <TextInput
                             className="flex-1 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl px-3 py-3 text-sm text-gray-800 font-mono"
                             placeholder="#00A3FF"
-                            placeholderTextColor="#9CA3AF"
+                            placeholderTextColor="#64748B"
                             value={customColorText}
                             onChangeText={t => {
                               setCustomColorText(t);
@@ -4370,12 +4373,17 @@ Example output:
               )}
             </ScrollView>
           </View>
-        ) : (
-          /* Live Preview Mode */
-          <ScrollView className="flex-1 bg-gray-100 p-6" showsVerticalScrollIndicator={false}>
-            {renderLivePreview()}
-          </ScrollView>
-        )}
+          )}
+
+          {(activeMode === 'preview' || Platform.OS === 'web') && (
+            <ScrollView 
+              style={Platform.OS === 'web' ? { width: '50%', padding: 24, backgroundColor: '#F8FAFC' } : { flex: 1, backgroundColor: '#F1F5F9', padding: 24 }} 
+              showsVerticalScrollIndicator={false}
+            >
+              {renderLivePreview()}
+            </ScrollView>
+          )}
+        </View>
       {/* GEMINI API KEY INPUT MODAL */}
       <Modal
         visible={showApiKeyModal}
@@ -4399,7 +4407,7 @@ Example output:
             <TextInput
               className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-900 font-mono mb-4 w-full"
               placeholder="AIzaSy..."
-              placeholderTextColor="#A3A3A3"
+              placeholderTextColor="#64748B"
               value={customApiKey}
               onChangeText={setCustomApiKey}
               secureTextEntry

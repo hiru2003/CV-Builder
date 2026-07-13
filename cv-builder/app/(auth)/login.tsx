@@ -13,6 +13,8 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
 
   const emailInputRef = useRef<TextInput>(null);
@@ -28,13 +30,30 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+    let hasError = false;
+    setEmailError('');
+    setPasswordError('');
+
+    if (!email) {
+      setEmailError('Please enter your email');
+      hasError = true;
+    } else if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      hasError = true;
     }
 
-    if (!validateEmail(email)) {
-      Alert.alert('Validation Error', 'Please enter a valid email address');
+    if (!password) {
+      setPasswordError('Please enter your password');
+      hasError = true;
+    } else if (!validatePassword(password)) {
+      setPasswordError('Password should be at least 6 characters');
+      hasError = true;
+    }
+
+    if (hasError) {
+      try {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      } catch (e) {}
       return;
     }
 
@@ -95,7 +114,8 @@ export default function LoginScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isEmailFocused && styles.inputWrapperFocused
+                  isEmailFocused && styles.inputWrapperFocused,
+                  !!emailError && styles.inputWrapperError
                 ]}
                 onPress={() => emailInputRef.current?.focus()}
               >
@@ -103,9 +123,12 @@ export default function LoginScreen() {
                   ref={emailInputRef}
                   style={styles.input}
                   placeholder="name@example.com"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(val) => {
+                    setEmail(val);
+                    if (emailError) setEmailError('');
+                  }}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -113,6 +136,7 @@ export default function LoginScreen() {
                   onBlur={() => setIsEmailFocused(false)}
                 />
               </Pressable>
+              {!!emailError && <Text style={styles.errorText}>{emailError}</Text>}
             </View>
 
             {/* Password Field */}
@@ -126,7 +150,8 @@ export default function LoginScreen() {
               <Pressable 
                 style={[
                   styles.inputWrapper, 
-                  isPasswordFocused && styles.inputWrapperFocused
+                  isPasswordFocused && styles.inputWrapperFocused,
+                  !!passwordError && styles.inputWrapperError
                 ]}
                 onPress={() => passwordInputRef.current?.focus()}
               >
@@ -134,9 +159,12 @@ export default function LoginScreen() {
                   ref={passwordInputRef}
                   style={styles.input}
                   placeholder="Password"
-                  placeholderTextColor="#A3A3A3"
+                  placeholderTextColor="#64748B"
                   value={password}
-                  onChangeText={setPassword}
+                  onChangeText={(val) => {
+                    setPassword(val);
+                    if (passwordError) setPasswordError('');
+                  }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -144,6 +172,7 @@ export default function LoginScreen() {
                   onBlur={() => setIsPasswordFocused(false)}
                 />
               </Pressable>
+              {!!passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
             </View>
 
             {/* Submit Button */}
@@ -245,6 +274,9 @@ const styles = StyleSheet.create({
   inputWrapperFocused: {
     borderColor: '#2563EB',
   },
+  inputWrapperError: {
+    borderColor: '#EF4444',
+  },
   input: {
     flex: 1,
     height: 48,
@@ -275,6 +307,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
